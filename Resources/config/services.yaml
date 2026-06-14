@@ -1,0 +1,34 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    SymPress\TwigBundle\:
+        resource: '../../src/'
+        exclude:
+            - '../../src/TwigBundle.php'
+            - '../../src/Attribute/'
+            - '../../src/DependencyInjection/'
+            - '../../src/Extension/GlobalProviderInterface.php'
+            - '../../src/Renderer/TemplateRendererInterface.php'
+
+    SymPress\TwigBundle\Extension\GlobalProviderExtension:
+        arguments:
+            $providers: !tagged_iterator
+                tag: 'twig.global_provider'
+        tags:
+            - { name: twig.extension }
+
+    SymPress\TwigBundle\Renderer\TwigTemplateRenderer:
+        arguments:
+            $twig: '@twig'
+        public: true
+
+    SymPress\TwigBundle\Renderer\TemplateRendererInterface:
+        alias: SymPress\TwigBundle\Renderer\TwigTemplateRenderer
+        public: true
+
+    twig.renderer:
+        alias: SymPress\TwigBundle\Renderer\TemplateRendererInterface
+        public: true

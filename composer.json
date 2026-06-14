@@ -1,0 +1,105 @@
+{
+    "name": "sympress/twig-bundle",
+    "description": "Twig integration bundle for SymPress with Symfony TwigBundle feature parity.",
+    "type": "library",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Brian Schäffner",
+            "email": "brian.schaeffner@sympress.de",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.5",
+        "symfony/config": "^8.0",
+        "symfony/dependency-injection": "^8.0",
+        "symfony/http-foundation": "^8.1",
+        "symfony/http-kernel": "^8.1",
+        "symfony/twig-bridge": "^8.1",
+        "symfony/twig-bundle": "^8.1",
+        "sympress/framework-bundle": "dev-main",
+        "sympress/kernel": "dev-main",
+        "twig/twig": "^3.22"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "phpstan/phpstan": "^2.1",
+        "phpunit/phpunit": "^11.5",
+        "sympress/coding-standards": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "SymPress\\TwigBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SymPress\\TwigBundle\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "kernel": {
+            "bundle": "SymPress\\TwigBundle\\TwigBundle",
+            "entry": "twig-bundle"
+        }
+    },
+    "scripts": {
+        "cs": [
+            "Composer\\Config::disableProcessTimeout",
+            "phpcs --standard=phpcs.xml.dist"
+        ],
+        "cs:fix": [
+            "Composer\\Config::disableProcessTimeout",
+            "phpcbf --standard=phpcs.xml.dist"
+        ],
+        "static-analysis": [
+            "Composer\\Config::disableProcessTimeout",
+            "phpstan analyse --memory-limit=1G --no-progress -c phpstan.neon.dist"
+        ],
+        "test": [
+            "@tests"
+        ],
+        "tests": [
+            "Composer\\Config::disableProcessTimeout",
+            "phpunit --configuration phpunit.xml.dist --no-coverage"
+        ],
+        "qa": [
+            "@cs",
+            "@static-analysis",
+            "@tests"
+        ]
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./../*",
+            "options": {
+                "symlink": true
+            }
+        }
+    ],
+    "suggest": {
+        "symfony/asset": "Enables the asset() Twig function.",
+        "symfony/asset-mapper": "Enables importmap Twig functions.",
+        "symfony/form": "Enables Symfony form rendering in Twig.",
+        "symfony/html-sanitizer": "Enables HTML sanitizer Twig filters.",
+        "symfony/mailer": "Enables email body rendering with Twig.",
+        "symfony/routing": "Enables path() and url() Twig functions.",
+        "symfony/serializer": "Enables serializer Twig helpers.",
+        "symfony/translation": "Enables trans and translation extraction support.",
+        "symfony/validator": "Enables form/validator integration.",
+        "symfony/web-link": "Enables preload/prefetch link helpers.",
+        "symfony/workflow": "Enables workflow Twig helpers.",
+        "symfony/yaml": "Enables yaml_encode and yaml_dump Twig helpers."
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
