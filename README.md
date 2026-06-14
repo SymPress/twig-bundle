@@ -1,5 +1,7 @@
 # SymPress TwigBundle
 
+[![Checks](https://img.shields.io/github/actions/workflow/status/SymPress/twig-bundle/qa.yml?branch=main&label=checks)](https://github.com/SymPress/twig-bundle/actions/workflows/qa.yml) [![Release](https://img.shields.io/packagist/v/sympress/twig-bundle.svg?label=release)](https://packagist.org/packages/sympress/twig-bundle) [![PHP](https://img.shields.io/packagist/dependency-v/sympress/twig-bundle/php.svg?label=php)](https://packagist.org/packages/sympress/twig-bundle) [![Downloads](https://img.shields.io/packagist/dt/sympress/twig-bundle.svg?label=downloads)](https://packagist.org/packages/sympress/twig-bundle/stats) [![License: GPL-2.0-or-later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE) [![Security Policy](https://img.shields.io/badge/security-policy-2ea44f.svg)](SECURITY.md)
+
 `sympress/twig-bundle` integrates Twig into the SymPress kernel while delegating the
 core feature set to Symfony's `symfony/twig-bundle`.
 
