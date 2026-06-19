@@ -40,7 +40,7 @@ final class TwigResponseTraitTest extends TestCase
 
         $response = $controller->renderTemplate('page.html.twig', ['title' => 'Hello']);
 
-        self::assertInstanceOf(Response::class, $response);
+        self::assertSame(Response::HTTP_OK, $response->getStatusCode());
         self::assertSame('page.html.twig:Hello', $response->getContent());
     }
 
