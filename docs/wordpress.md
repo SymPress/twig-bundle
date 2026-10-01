@@ -130,11 +130,33 @@ Lazy runtimes expose `wp_head`, `wp_footer`, `wp_body_open`,
 
 Filters include `esc_html`, `esc_attr`, `esc_url`, `esc_js`, `wp_kses_post`,
 `wp_kses`, `wpautop`, `shortcodes`, `stripshortcodes`, `excerpt`, `time_ago`,
-`size_format` and WordPress-aware `date`. The first five escaping filters are
+`size_format`, `wp_date` and WordPress-aware `date`. The first five escaping filters are
 also available as escape strategies, e.g. `value|e('esc_url')`. Date formatting
 uses `wp_date`, the WordPress timezone and the configured date format by default.
 Translations accept an optional final textdomain and are not marked safe.
 Arbitrary PHP function calls and database-query template helpers are absent.
+
+Prefer `value|wp_date(format, timezone)` for WordPress date formatting. The `date`
+alias remains available for compatibility and overrides Twig's built-in `date`
+filter when the WordPress layer is active.
+
+`value|wpautop` escapes ordinary strings as HTML before adding paragraph markup.
+For example, `<strong>text</strong>` in an ordinary string is shown as text,
+not a bold element. Explicitly trusted Twig markup keeps its existing HTML;
+never mark arbitrary input trusted. This protection requires HTML autoescaping,
+which is the default for theme templates; do not disable it for untrusted input.
+
+`value|shortcodes` expands registered WordPress shortcodes, then sanitizes the
+entire result with `wp_kses_post()` before exposing it as safe HTML. Allowed
+post markup survives; script tags, event-handler attributes and unsafe URL
+protocols do not. This also applies to HTML returned by shortcode callbacks,
+including explicitly trusted input and templates with autoescaping disabled.
+Callbacks still execute normally and remain responsible for authorization and
+side effects. Shortcodes needing scripts must enqueue them through WordPress.
+
+These restrictions were introduced in 1.1.1 to close an HTML-escaping bypass.
+Themes relying on arbitrary HTML in `wpautop` input or script output from
+`shortcodes` must adapt to these boundaries.
 
 ## Escaping and ACF
 

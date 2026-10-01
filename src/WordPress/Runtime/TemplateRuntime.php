@@ -138,7 +138,7 @@ final class TemplateRuntime
         return sprintf($format, ...$args);
     }
 
-    #[AsTwigFilter('wpautop', isSafe: ['html'])]
+    #[AsTwigFilter('wpautop', isSafe: ['html'], preEscape: 'html')]
     public function paragraphs(string $value): string
     {
         return wpautop($value);
@@ -147,7 +147,7 @@ final class TemplateRuntime
     #[AsTwigFilter('shortcodes', isSafe: ['html'])]
     public function shortcodes(string $value): string
     {
-        return do_shortcode($value);
+        return wp_kses_post(do_shortcode($value));
     }
 
     #[AsTwigFilter('stripshortcodes')]
@@ -175,6 +175,7 @@ final class TemplateRuntime
     }
 
     #[AsTwigFilter('date')]
+    #[AsTwigFilter('wp_date')]
     public function date(\DateTimeInterface|int|string|null $value, ?string $format = null, \DateTimeZone|string|false|null $timezone = null): string
     {
         $zone = $timezone instanceof \DateTimeZone ? $timezone : (is_string($timezone) ? new \DateTimeZone($timezone) : wp_timezone());

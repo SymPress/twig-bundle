@@ -1,9 +1,8 @@
 parameters:
     level: 8
-    excludePaths:
-        - tests/WordPress
     paths:
         - src
-        - tests
+        - tests/Unit
+        - tests/Fixtures
     scanFiles:
         - vendor/autoload.php

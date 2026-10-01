@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
+## 1.1.1 - 2026-10-01
+
+- Escape untrusted `wpautop` input before paragraph formatting and sanitize
+  shortcode output with `wp_kses_post()`. Scripts, event handlers and unsafe URL
+  protocols are no longer exposed as safe HTML; shortcode scripts must be enqueued.
+- Restrict PHPStan paths to source, unit tests and fixtures so an installed
+  WordPress integration fixture cannot recurse through its self-referencing symlink.
+- Add `wp_date` as an explicit WordPress date filter, retaining the `date` alias.
+- Cover these HTML boundaries with Twig rendering tests and real WordPress checks.
+- Limit coding-standard exceptions to the specific files that require them.
+
 ## 1.1.0 - 2026-10-01
 
 - Add an opt-in WordPress theme layer with active-slug selection, child-first
