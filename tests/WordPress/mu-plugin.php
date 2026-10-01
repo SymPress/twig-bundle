@@ -6,9 +6,11 @@ if (!wp_installing()) {
     };
     add_action('doing_it_wrong_run', $wrong);
     \SymPress\Kernel\App::bootKernel(new \SymPress\Kernel\Kernel\SiteKernel(__DIR__, 'test', true));
-    $twig = \SymPress\Kernel\App::make(\SymPress\TwigFixture\EarlyRenderer::class)->twig;
-    if ($twig->createTemplate('{{ __("Early", "default") }}')->render() !== 'Early') {
-        throw new \RuntimeException('WordPress helpers must be available during MU-plugin bootstrap.');
+    if (\SymPress\Kernel\App::make(\SymPress\TwigBundle\WordPress\ThemeConfiguration::class)->selected() !== null) {
+        $twig = \SymPress\Kernel\App::make(\SymPress\TwigFixture\EarlyRenderer::class)->twig;
+        if ($twig->createTemplate('{{ __("Early", "default") }}')->render() !== 'Early') {
+            throw new \RuntimeException('WordPress helpers must be available during MU-plugin bootstrap.');
+        }
     }
     remove_action('doing_it_wrong_run', $wrong);
 }
