@@ -10,6 +10,12 @@ use SymPress\TwigBundle\DependencyInjection\TwigExtension;
 use SymPress\TwigBundle\Extension\GlobalProviderInterface;
 use SymPress\TwigBundle\TwigBundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use SymPress\TwigBundle\Tests\Fixtures\EventPost;
+use SymPress\TwigBundle\Tests\Fixtures\PageComposer;
+use SymPress\TwigBundle\WordPress\PostFactory;
+use SymPress\TwigBundle\WordPress\ThemeRenderer;
+use Twig\Environment;
+use SymPress\TwigBundle\WordPress\Site;
 
 final class TwigBundleTest extends TestCase
 {
@@ -47,6 +53,31 @@ final class TwigBundleTest extends TestCase
         $container->register('error_renderer.html', \stdClass::class);
 
         return $container;
+    }
+
+    public function testWordPressModelsComposersAndSiteAreWiredInCompiledContainer(): void
+    {
+        $container = $this->container();
+        $container->register(EventPost::class, EventPost::class)->setAutoconfigured(true);
+        $container->register(PageComposer::class, PageComposer::class)->setAutoconfigured(true);
+        (new TwigBundle())->build($container);
+        $container->prependExtensionConfig('sympress_twig', ['wordpress' => ['themes' => ['parent-theme' => []]]]);
+        (new TwigExtension())->load([[]], $container);
+        $container->getDefinition('twig')->setPublic(true);
+        $container->compile();
+        $factory = $container->get(PostFactory::class);
+        self::assertInstanceOf(PostFactory::class, $factory);
+        $post = new \WP_Post();
+        $post->post_type = 'event';
+        self::assertInstanceOf(EventPost::class, $factory->from($post));
+        $entries = $container->getDefinition(ThemeRenderer::class)->getArgument(4);
+        self::assertCount(1, $entries);
+        self::assertSame(['page-*'], $entries[0]['templates']);
+        self::assertSame(42, $entries[0]['priority']);
+        $twig = $container->get('twig');
+        self::assertInstanceOf(Environment::class, $twig);
+        self::assertInstanceOf(Site::class, $twig->getGlobals()['site']);
+        self::assertNull($twig->getFunction('menu'), 'Outside an active WordPress theme standard Twig remains intact.');
     }
 }
 

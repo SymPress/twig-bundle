@@ -1,9 +1,16 @@
 # SymPress TwigBundle
 
+See the [public API and deprecation policy](docs/public-api.md) for stable
+WordPress extension contracts and production cache handling.
+
 [![Checks](https://img.shields.io/github/actions/workflow/status/SymPress/twig-bundle/qa.yml?branch=main&label=checks)](https://github.com/SymPress/twig-bundle/actions/workflows/qa.yml) [![Release](https://img.shields.io/github/v/release/SymPress/twig-bundle?label=release)](https://github.com/SymPress/twig-bundle/releases) [![PHP](https://img.shields.io/packagist/dependency-v/sympress/twig-bundle/php.svg?label=php)](https://packagist.org/packages/sympress/twig-bundle) [![Downloads](https://img.shields.io/packagist/dt/sympress/twig-bundle.svg?label=downloads)](https://packagist.org/packages/sympress/twig-bundle/stats) [![License: GPL-2.0-or-later](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE) [![Security Policy](https://img.shields.io/badge/security-policy-2ea44f.svg)](SECURITY.md)
 
 `sympress/twig-bundle` integrates Twig into the SymPress kernel while delegating the
 core feature set to Symfony's `symfony/twig-bundle`.
+
+For registered classic WordPress themes, the optional [WordPress layer](docs/wordpress.md)
+provides child-aware template loading, lazy models, composers, menus and pagination
+without a second Twig environment.
 
 ## Installation
 

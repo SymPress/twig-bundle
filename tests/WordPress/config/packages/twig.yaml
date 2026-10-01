@@ -1,0 +1,8 @@
+twig:
+  strict_variables: true
+  cache: false
+sympress_twig:
+  wordpress:
+    debug_comment: false
+    themes:
+      twig-parent: {}

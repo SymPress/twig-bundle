@@ -1,0 +1,29 @@
+{
+  "name": "sympress/twig-wordpress-tests",
+  "type": "project",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "roots/wordpress": "^7.1.1",
+    "sympress/twig-bundle": "@dev",
+    "symfony/yaml": "^8.1"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../..",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "extra": {
+    "wordpress-install-dir": "public/wp"
+  },
+  "config": {
+    "allow-plugins": {
+      "roots/wordpress-core-installer": true
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

@@ -11,7 +11,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class TwigExtension extends SymfonyTwigExtension
 {
-    /** @param array<int, array<string, mixed>> $config */
+    /**
+     * @param array<int, array<string, mixed>> $config
+     */
     public function getConfiguration(array $config, ContainerBuilder $container): ConfigurationInterface
     {
         return new SymfonyTwigConfiguration();
@@ -23,6 +25,10 @@ final class TwigExtension extends SymfonyTwigExtension
     public function load(array $configs, ContainerBuilder $container): void
     {
         $this->initializeKernelParameters($container);
+
+        if (defined('WP_DEBUG') && !array_any($configs, static fn (array $config): bool => array_key_exists('auto_reload', $config))) {
+            array_unshift($configs, ['auto_reload' => (bool) WP_DEBUG]);
+        }
 
         parent::load($configs, $container);
     }

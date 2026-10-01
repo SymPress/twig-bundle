@@ -15,6 +15,9 @@
 
     <exclude-pattern>vendor/*</exclude-pattern>
     <exclude-pattern>.phpunit.cache/*</exclude-pattern>
+    <exclude-pattern>tests/Fixtures/*</exclude-pattern>
+    <!-- Native WordPress fixture entry points run under real WP, not Pure PHP. -->
+    <exclude-pattern>tests/WordPress/*</exclude-pattern>
 
     <rule ref="SymPress-Pure">
         <exclude name="Generic.Files.OneObjectStructurePerFile.MultipleFound" />

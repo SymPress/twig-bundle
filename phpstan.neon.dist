@@ -1,5 +1,7 @@
 parameters:
     level: 8
+    excludePaths:
+        - tests/WordPress
     paths:
         - src
         - tests

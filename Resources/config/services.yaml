@@ -12,6 +12,7 @@ services:
             - '../../src/DependencyInjection/'
             - '../../src/Extension/GlobalProviderInterface.php'
             - '../../src/Renderer/TemplateRendererInterface.php'
+            - '../../src/WordPress/'
 
     SymPress\TwigBundle\Extension\GlobalProviderExtension:
         arguments:

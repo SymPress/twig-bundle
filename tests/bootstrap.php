@@ -15,3 +15,5 @@ foreach (
     require $autoloader;
     break;
 }
+
+require __DIR__ . '/Fixtures/WP_Post.php';

@@ -1,4 +1,13 @@
 /vendor/
+/tests/WordPress/vendor/
+/tests/WordPress/public/
+/tests/WordPress/var/
+/tests/WordPress/composer.lock
+/.ddev/.gitignore
+/.ddev/.global_commands/
+/.ddev/.webimageBuild/
+/.ddev/.dbimageBuild/
+/.ddev/.ddev-docker-compose*.yaml
 /.phpunit.cache/
 /coverage-html/
 /.php-cs-fixer.cache
