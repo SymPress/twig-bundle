@@ -139,39 +139,39 @@ final class TemplateRuntime
     }
 
     #[AsTwigFilter('wpautop', isSafe: ['html'], preEscape: 'html')]
-    public function paragraphs(string $value): string
+    public function paragraphs(?string $value): string
     {
-        return wpautop($value);
+        return wpautop($value ?? '');
     }
 
     #[AsTwigFilter('shortcodes', isSafe: ['html'])]
-    public function shortcodes(string $value): string
+    public function shortcodes(?string $value): string
     {
-        return wp_kses_post(do_shortcode($value));
+        return wp_kses_post(do_shortcode($value ?? ''));
     }
 
     #[AsTwigFilter('stripshortcodes')]
-    public function stripShortcodes(string $value): string
+    public function stripShortcodes(?string $value): string
     {
-        return strip_shortcodes($value);
+        return strip_shortcodes($value ?? '');
     }
 
     #[AsTwigFilter('excerpt')]
-    public function excerpt(string $value, int $words = 30): string
+    public function excerpt(?string $value, int $words = 30): string
     {
-        return wp_trim_words(Html::text(strip_shortcodes($value)), $words, '…');
+        return wp_trim_words(Html::text(strip_shortcodes($value ?? '')), $words, '…');
     }
 
     #[AsTwigFilter('time_ago')]
-    public function timeAgo(int $timestamp, ?int $now = null): string
+    public function timeAgo(?int $timestamp, ?int $now = null): string
     {
-        return human_time_diff($timestamp, $now ?? time());
+        return $timestamp === null ? '' : human_time_diff($timestamp, $now ?? time());
     }
 
     #[AsTwigFilter('size_format')]
-    public function size(int|float|string $bytes, int $decimals = 0): string
+    public function size(int|float|string|null $bytes, int $decimals = 0): string
     {
-        return (string) size_format(is_float($bytes) ? (int) $bytes : $bytes, $decimals);
+        return $bytes === null ? '' : (string) size_format(is_float($bytes) ? (int) $bytes : $bytes, $decimals);
     }
 
     #[AsTwigFilter('date')]

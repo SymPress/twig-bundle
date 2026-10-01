@@ -130,8 +130,10 @@ Lazy runtimes expose `wp_head`, `wp_footer`, `wp_body_open`,
 
 Filters include `esc_html`, `esc_attr`, `esc_url`, `esc_js`, `wp_kses_post`,
 `wp_kses`, `wpautop`, `shortcodes`, `stripshortcodes`, `excerpt`, `time_ago`,
-`size_format`, `wp_date` and WordPress-aware `date`. The first five escaping filters are
-also available as escape strategies, e.g. `value|e('esc_url')`. Date formatting
+`size_format`, `wp_date` and WordPress-aware `date`. Use WordPress escaping as
+filters, e.g. `value|esc_url`; Twig's standard escape strategies remain upstream.
+The custom WordPress strategies such as `e('esc_url')` were withdrawn in 1.1.2
+because they double-escaped output under HTML autoescaping. Date formatting
 uses `wp_date`, the WordPress timezone and the configured date format by default.
 Translations accept an optional final textdomain and are not marked safe.
 Arbitrary PHP function calls and database-query template helpers are absent.
@@ -157,6 +159,10 @@ side effects. Shortcodes needing scripts must enqueue them through WordPress.
 These restrictions were introduced in 1.1.1 to close an HTML-escaping bypass.
 Themes relying on arbitrary HTML in `wpautop` input or script output from
 `shortcodes` must adapt to these boundaries.
+
+Text/HTML filters accept `null` as an empty string, including missing ACF fields.
+`time_ago` and `size_format` return an empty string for `null`. The `date` and
+`wp_date` filters retain Twig's existing `null`-means-now convention.
 
 ## Escaping and ACF
 
