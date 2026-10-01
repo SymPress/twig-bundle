@@ -1,0 +1,9 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+  SymPress\TwigFixture\ModelLabel: ~
+  SymPress\TwigFixture\InjectedPost: ~
+  SymPress\TwigFixture\InjectedTerm: ~
+  SymPress\TwigFixture\EarlyRenderer:
+    public: true

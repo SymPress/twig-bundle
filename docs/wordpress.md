@@ -3,7 +3,11 @@
 The WordPress adapter uses the existing Symfony Twig environment. It never boots
 a kernel or installs WordPress. Ordinary Twig usage is unchanged without an
 active registered classic theme; frontend interception excludes regular admin requests and block themes.
-Custom-template discovery also runs in admin requests so the editor lists Twig templates.
+WordPress functions, filters, `site`, and the shared WordPress layout are available
+in regular admin requests, including mail rendering. Custom-template discovery
+also runs there so the editor lists Twig templates; `@theme` and frontend
+interception remain disabled. Helpers can be initialized during MU-plugin boot
+before theme directories are registered; block-theme inspection waits for theme setup.
 AJAX requests may render explicitly even when WordPress reports an admin context.
 
 ## Activation
@@ -26,7 +30,7 @@ public function prependExtension(ContainerConfigurator $configurator, ContainerB
 
 The runtime selects `get_stylesheet()` first, then `get_template()`. A child theme
 without a registration inherits the parent's configuration. Other installed
-theme bundles cannot activate their settings. Selection happens at
+theme bundles cannot activate their settings. Frontend activation happens at
 `after_setup_theme`, after WordPress has loaded the theme. A theme may declare
 `add_theme_support('sympress-twig')` in its setup as a capability marker; the
 bundle registration is the activation mechanism. Theme support alone does not
@@ -45,7 +49,8 @@ theme's `Text Domain` header; a registration can override it.
 with `head` and `body` blocks. Themes normally add a `content` block in their layout.
 
 Template hierarchy filters are observed at `PHP_INT_MAX` while WordPress runs
-its own template loader. The bundle never replays its template getters. A PHP
+its own template loader. Captures from earlier plugin getters are reset at the
+end of `template_redirect`. The bundle never replays template getters. A PHP
 template outside the theme, or an explicitly selected unranked PHP template,
 is retained. A more specific PHP candidate wins; equal specificity prefers Twig.
 The selected Twig template is rendered through the bundle's PHP include stub.
@@ -90,19 +95,37 @@ exception and nested loops. Regular admin iteration does not modify loop globals
 explicit AJAX rendering uses the same scoped loop behavior as frontend rendering.
 Avoid `|slice` or converting the collection to an array when template tags need
 the active loop; these operations materialize the iterator before rendering.
-Use `loop.first` to create featured-post layouts within one loop.
+Secondary loops change post globals while retaining the main `wp_query`, so
+conditional tags and content plugins keep the page's original query. Explicit
+query-context construction is scoped separately. Use two passes over the repeatable
+collection for a featured post followed by a grid, with complete wrappers in each pass.
 
 Each readonly `Post` wraps `wpPost` and exposes `id`, `title`, `url`, `type`,
 `protected`, `date(format)`, `date_iso`, `content`, `excerpt(words)`,
-`thumbnail(size, attributes)`, `categories` and explicit `meta(key)`. There is no
+`thumbnail(size, attributes)`, `categories`, `author`, `terms(taxonomy)` and
+explicit `meta(key)`. There is no
 magic fallback from unknown properties to metadata. Content, excerpts and images
 are lazy; content is filtered once per object. Protected content produces the
 WordPress password form; protected metadata/images are withheld. Excerpts never
-expose password-protected stored text, including to unlocked visitors.
+expose password-protected stored text, including to unlocked visitors. Author
+and taxonomy lookups are lazy and memoized; protected posts return null/empty
+results. Unknown taxonomies return an empty list. Term access uses configured models.
+
+`author` in archive context and `post.author` return a public `User` profile with
+`id`, `name`, `slug`, `url`, `description` and `avatar(size)`. Safe compatibility
+aliases are `ID`, `display_name` and `user_nicename`. The profile retains no native
+`WP_User`, email, password hash, roles, capabilities or account metadata. Supply
+any intentionally private data separately through an authorized PHP composer.
 
 Extend the readonly Post class with `#[WordPress\Attribute\AsPostModel('event')]`
 on an autoconfigured class. `AsTermModel('genre')` similarly selects a readonly
-`Term` subclass. Constructors retain the base model contract. Duplicate mappings
+`Term` subclass. Subclasses must remain readonly. Constructors take the native
+`WP_Post`/`WP_Term` as their first argument, followed by required services and
+optional defaults. The container resolves typed registered dependencies, explicit
+service arguments and bindings; a missing required dependency fails compilation.
+Post constructors may request `MetaResolverInterface` and `TermFactory` and pass
+them to the parent constructor. Models are created per native object, rather than
+as singleton services; injected dependencies are resolved lazily. Duplicate mappings
 fail container compilation. `PostFactory` also applies post models to ACF relations.
 Term models expose `id`, `name`, `slug`, `taxonomy`, `url` and the native `wpTerm`.
 
@@ -114,10 +137,26 @@ implementations match `*`. `TemplateContext` exposes `template`, `candidates`,
 `data` and `post()`. Plugins without DI can use `sympress/twig/context` and
 `sympress/twig/template_candidates`.
 
+Matching uses the candidate list, not only the resolved template. Native page
+hierarchies always contain `index`, so `templates: ['index']` runs on every page.
+Use `*` for an explicit global composer; inspect `TemplateContext::template` when
+logic depends on the resolved file. Explicit render calls match their supplied
+candidates; the implicit index fallback is only used for template lookup.
+Debug template comments are appended only to `renderCurrent()`, never to
+`render()` or `renderBlock()` fragments.
+
 ## Menus, pagination and WordPress helpers
 
 `menu('primary', {depth: 2})` returns a `Menu` with `items`. Items provide `id`,
-`title`, `link`, `current`, `classes`, `children`, `target` and `rel`.
+`title`, `link`, `current`, `classes`, `children`, `target`, `rel`, `description`
+and `attr_title`. Additional native menu arguments such as `menu_class` are
+accepted. WordPress prepares the menu and current-state classes and runs
+`wp_nav_menu_objects` with its complete argument object; the collector applies
+`the_title`, `nav_menu_item_title`, `nav_menu_item_args` and `nav_menu_css_class`.
+The object API owns its walker and output options. HTML-output filters are not
+object transforms; a `pre_wp_nav_menu` short-circuit or a filter replacing the
+collector walker produces no collected objects. Use `wp_nav_menu(args)` for
+plugins supplying their own walkers or fully rendered markup.
 `pagination({prev_text: __('Back'), next_text: __('Next')})` provides `pages`,
 `next`, `prev`, `current`; each link has `title`, `url`, `current` (gaps have a null
 URL). Themes own all markup. Use `wp_nav_menu(args)` for WordPress-rendered HTML.
@@ -136,11 +175,19 @@ The custom WordPress strategies such as `e('esc_url')` were withdrawn in 1.1.2
 because they double-escaped output under HTML autoescaping. Date formatting
 uses `wp_date`, the WordPress timezone and the configured date format by default.
 Translations accept an optional final textdomain and are not marked safe.
-Arbitrary PHP function calls and database-query template helpers are absent.
+There is no generic PHP-function or database-query helper. `action(name, ...args)`
+does dispatch any registered WordPress action and captures its output as trusted
+HTML. Treat templates as application code: action handlers can have side effects
+and must authorize their operations and escape their output. Never take action
+names or arguments from unvalidated user input. The raw-filter lint is not a sandbox.
 
 Prefer `value|wp_date(format, timezone)` for WordPress date formatting. The `date`
 alias remains available for compatibility and overrides Twig's built-in `date`
 filter when the WordPress layer is active.
+`DateInterval` values delegate to Twig's interval formatter (including its default
+interval format). `timezone: false` retains a DateTime object's timezone; for
+timestamps, strings and null it uses the WordPress timezone. Other date values
+default to the site timezone and WordPress date format rather than Twig defaults.
 
 `value|wpautop` escapes ordinary strings as HTML before adding paragraph markup.
 For example, `<strong>text</strong>` in an ordinary string is shown as text,

@@ -12,9 +12,15 @@ final class TemplateHierarchy
 
     public function register(): void
     {
+        add_action('template_redirect', $this->reset(...), PHP_INT_MAX);
         foreach (self::TYPES as $type) {
             add_filter($type . '_template_hierarchy', $this->capture(...), PHP_INT_MAX);
         }
+    }
+
+    public function reset(): void
+    {
+        $this->captured = [];
     }
 
     /**

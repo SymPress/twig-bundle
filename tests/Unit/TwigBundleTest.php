@@ -16,6 +16,10 @@ use SymPress\TwigBundle\WordPress\PostFactory;
 use SymPress\TwigBundle\WordPress\ThemeRenderer;
 use Twig\Environment;
 use SymPress\TwigBundle\WordPress\Site;
+use SymPress\TwigBundle\Tests\Fixtures\ModelLabel;
+use SymPress\TwigBundle\Tests\Fixtures\InjectedPost;
+use SymPress\TwigBundle\Tests\Fixtures\InjectedTerm;
+use SymPress\TwigBundle\WordPress\TermFactory;
 
 final class TwigBundleTest extends TestCase
 {
@@ -78,6 +82,42 @@ final class TwigBundleTest extends TestCase
         self::assertInstanceOf(Environment::class, $twig);
         self::assertInstanceOf(Site::class, $twig->getGlobals()['site']);
         self::assertNull($twig->getFunction('menu'), 'Outside an active WordPress theme standard Twig remains intact.');
+    }
+
+    public function testModelConstructorsReceiveServicesAndExplicitScalarBindings(): void
+    {
+        $container = $this->container();
+        $container->register(ModelLabel::class);
+        $container->register(InjectedPost::class)
+            ->setAutowired(true)->setAutoconfigured(true)->setBindings(['$prefix' => 'bound']);
+        $container->register(InjectedTerm::class)
+            ->setAutowired(true)->setAutoconfigured(true);
+        (new TwigBundle())->build($container);
+        (new TwigExtension())->load([[]], $container);
+        $container->setAlias('test.terms', TermFactory::class)->setPublic(true);
+        $container->compile();
+        $native = new \WP_Post();
+        $native->post_type = 'injected';
+        $factory = $container->get(PostFactory::class);
+        self::assertInstanceOf(PostFactory::class, $factory);
+        $post = $factory->from($native);
+        self::assertInstanceOf(InjectedPost::class, $post);
+        self::assertSame('bound injected', $post->label());
+        $terms = $container->get('test.terms');
+        self::assertInstanceOf(TermFactory::class, $terms);
+        $term = $terms->from(new \WP_Term());
+        self::assertInstanceOf(InjectedTerm::class, $term);
+        self::assertSame('injected', $term->label());
+    }
+
+    public function testUnresolvedModelDependencyFailsDuringContainerCompilation(): void
+    {
+        $container = $this->container();
+        $container->register(InjectedPost::class)->setAutoconfigured(true);
+        (new TwigBundle())->build($container);
+        (new TwigExtension())->load([[]], $container);
+        $this->expectException(\InvalidArgumentException::class);
+        $container->compile();
     }
 }
 
