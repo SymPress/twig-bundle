@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   wordpress:
-    uses: sympress/workflows/.github/workflows/ddev-playwright.yml@v1
+    uses: sympress/workflows/.github/workflows/ddev-playwright.yml@177fa0d727b278d2103052ec77c102b4a4c492a0
     with:
       php_version: '8.5'
       node_version: '24'
@@ -22,10 +22,10 @@ jobs:
       playwright_run_command: ddev exec bash tests/WordPress/run.sh
 
   workflows:
-    uses: sympress/workflows/.github/workflows/lint-workflows.yml@v1
+    uses: sympress/workflows/.github/workflows/lint-workflows.yml@177fa0d727b278d2103052ec77c102b4a4c492a0
 
   qa:
-    uses: sympress/workflows/.github/workflows/sympress-qa.yml@v1
+    uses: sympress/workflows/.github/workflows/sympress-qa.yml@177fa0d727b278d2103052ec77c102b4a4c492a0
     with:
       php_version: '8.5'
     secrets:
