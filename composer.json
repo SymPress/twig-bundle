@@ -18,16 +18,18 @@
         "symfony/http-kernel": "^8.1",
         "symfony/twig-bridge": "^8.1",
         "symfony/twig-bundle": "^8.1",
-        "sympress/framework-bundle": "^1.0.1",
-        "sympress/kernel": "^1.1",
+        "sympress/framework-bundle": "^1.0.2",
+        "sympress/kernel": "^1.1.1",
         "twig/twig": "^3.22"
     },
     "require-dev": {
         "brain/monkey": "^2.6",
-        "sympress/qa": "^0.1"
+        "sympress/qa": "^0.1.2"
     },
     "autoload": {
-        "files": ["src/WordPress/functions.php"],
+        "files": [
+            "src/WordPress/functions.php"
+        ],
         "psr-4": {
             "SymPress\\TwigBundle\\": "src/"
         }
