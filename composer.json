@@ -23,9 +23,11 @@
         "twig/twig": "^3.22"
     },
     "require-dev": {
+        "brain/monkey": "^2.6",
         "sympress/qa": "^0.1"
     },
     "autoload": {
+        "files": ["src/WordPress/functions.php"],
         "psr-4": {
             "SymPress\\TwigBundle\\": "src/"
         }

@@ -1,0 +1,9 @@
+name: sympress-twig
+type: php
+docroot: tests/WordPress/public
+php_version: "8.5"
+webserver_type: nginx-fpm
+nodejs_version: "24"
+database:
+  type: mariadb
+  version: "10.11"

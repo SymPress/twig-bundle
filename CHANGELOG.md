@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
-## Unreleased
+## 1.1.0 - 2026-10-01
 
-- Initial Twig Bundle package with Symfony TwigBundle integration, SymPress renderer services, global-provider support, and QA workflow configuration.
+- Add an opt-in WordPress theme layer with active-slug selection, child-first
+  `@theme` paths, native hierarchy capture, PHP/plugin precedence, custom templates,
+  block rendering and a shared document layout.
+- Add lazy posts, post/term model attributes, loop restoration, query context,
+  template composers, menu/pagination objects and optional ACF metadata conversion.
+- Add lazy WordPress Twig runtimes, WordPress date formatting, explicit escaping
+  strategies and a reusable lint rule rejecting the `raw` filter in themes.
+
+- Register custom page templates in admin requests as well as the frontend.
+- Preserve composer attribute patterns and priorities when interface autoconfiguration also adds a tag.
+
+## 1.0.x
+
+- Symfony TwigBundle integration, SymPress renderer services and global-provider support.

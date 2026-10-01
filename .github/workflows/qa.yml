@@ -11,6 +11,16 @@ permissions:
   contents: read
 
 jobs:
+  wordpress:
+    uses: sympress/workflows/.github/workflows/ddev-playwright.yml@v1
+    with:
+      php_version: '8.5'
+      node_version: '24'
+      allow_custom_commands: true
+      setup_command: ddev exec bash tests/WordPress/setup.sh
+      playwright_install_command: 'true'
+      playwright_run_command: ddev exec bash tests/WordPress/run.sh
+
   workflows:
     uses: sympress/workflows/.github/workflows/lint-workflows.yml@v1
 
