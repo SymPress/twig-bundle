@@ -101,7 +101,7 @@ final class IntegrationTest extends WordPressTestCase
             $hierarchy = new TemplateHierarchy();
             $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), $config);
             $custom = new CustomTemplates($config);
-            $integration = new Integration($config, $twig, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer));
+            $integration = new Integration($config, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer));
             $integration->activate();
             $integration->activate();
             self::assertSame('child', $renderer->render('index'));
@@ -242,7 +242,7 @@ final class IntegrationTest extends WordPressTestCase
         $twig = new Environment($loader, ['autoescape' => 'html']);
         $hierarchy = new TemplateHierarchy();
         $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), $config);
-        (new Integration($config, $twig, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer)))->activate();
+        (new Integration($config, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer)))->activate();
         try {
             $twig->createTemplate('{{ value|e("esc_url") }}')->render(['value' => 'https://x.de/?a=1&b=2']);
             self::fail('WordPress escaping must use the HTML-safe filters.');

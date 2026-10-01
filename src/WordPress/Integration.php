@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace SymPress\TwigBundle\WordPress;
 
-use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
 /** @internal */
@@ -14,7 +13,6 @@ final class Integration
 
     public function __construct(
         private readonly ThemeConfiguration $configuration,
-        Environment $twig,
         private readonly FilesystemLoader $loader,
         private readonly TemplateHierarchy $hierarchy,
         private readonly TemplateInclude $include,
