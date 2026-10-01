@@ -19,22 +19,111 @@
     <!-- Native WordPress fixture entry points run under real WP, not Pure PHP. -->
     <exclude-pattern>tests/WordPress/*</exclude-pattern>
 
-    <rule ref="SymPress-Pure">
-        <exclude name="Generic.Files.OneObjectStructurePerFile.MultipleFound" />
-        <exclude name="PSR1.Classes.ClassDeclaration.MultipleClasses" />
-        <exclude name="SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty" />
-        <exclude name="SlevomatCodingStandard.Commenting.RequireOneLineDocComment.MultiLineDocComment" />
-        <exclude name="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter" />
-        <exclude name="SlevomatCodingStandard.Namespaces.UseSpacing.IncorrectLinesCountBeforeFirstUse" />
-        <exclude name="Squiz.Classes.ClassDeclaration.MultipleClasses" />
-        <exclude name="Squiz.Classes.ClassDeclaration.NewlinesAfterCloseBrace" />
-        <exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace" />
-        <exclude name="Squiz.Classes.ClassFileName.NoMatch" />
-        <exclude name="SymPress.Arrays.ArrayDoubleArrowAlignment.AssignmentsNotAligned" />
-        <exclude name="SymPress.Classes.AccessorNaming.GetterRequired" />
-        <exclude name="SymPress.Files.LineLength.TooLong" />
-        <exclude name="SymPress.Formatting.AlphabeticalUseStatements.MustBeSortedAlphabetically" />
-        <exclude name="SymPress.Functions.FunctionLength.TooLong" />
+    <rule ref="SymPress-Pure" />
+
+    <!-- Keep API data, callback and existing formatting exceptions file-specific. -->
+    <rule ref="Generic.Files.OneObjectStructurePerFile.MultipleFound">
+        <exclude-pattern>*/tests/Unit/TwigBundleTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR1.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>*/tests/Unit/TwigBundleTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Classes.ForbiddenPublicProperty.ForbiddenPublicProperty">
+        <exclude-pattern>*/src/Attribute/AsTwigGlobal.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Attribute/AsPostModel.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Attribute/AsTemplateComposer.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Attribute/AsTermModel.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Image.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Menu.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MenuItem.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Pagination.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PaginationLink.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Post.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/TemplateContext.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Term.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeConfiguration.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Commenting.RequireOneLineDocComment.MultiLineDocComment">
+        <exclude-pattern>*/src/DependencyInjection/SymPressTwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/src/DependencyInjection/TwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Attribute/AsTemplateComposer.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Image.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Menu.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MetaResolver.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Pagination.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Post.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PostCollection.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PostFactory.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PostScope.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/QueryContextProvider.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Runtime/EscapingRuntime.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Runtime/QueryRuntime.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Runtime/TemplateRuntime.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/TemplateComposerInterface.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/TemplateHierarchy.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeConfiguration.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeRenderer.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter">
+        <exclude-pattern>*/src/DependencyInjection/TwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Integration.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Lint/NoRawFilter.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/TwigResponseTraitTest.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/WordPress/ObjectsTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="Squiz.Classes.ClassDeclaration.MultipleClasses">
+        <exclude-pattern>*/tests/Unit/TwigBundleTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="Squiz.Classes.ClassFileName.NoMatch">
+        <exclude-pattern>*/tests/Unit/TwigBundleTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SymPress.Arrays.ArrayDoubleArrowAlignment.AssignmentsNotAligned">
+        <exclude-pattern>*/src/WordPress/QueryContextProvider.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeConfiguration.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SymPress.Classes.AccessorNaming.GetterRequired">
+        <exclude-pattern>*/src/WordPress/ThemeRenderer.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SymPress.Files.LineLength.TooLong">
+        <exclude-pattern>*/src/Controller/TwigResponseTrait.php$</exclude-pattern>
+        <exclude-pattern>*/src/DependencyInjection/Compiler/WordPressPass.php$</exclude-pattern>
+        <exclude-pattern>*/src/DependencyInjection/SymPressTwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/src/DependencyInjection/TwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/src/TwigBundle.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/CustomTemplates.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Lint/NoRawFilter.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Menu.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MetaResolver.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Pagination.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/Post.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PostCollection.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/PostScope.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/QueryContextProvider.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/TemplateHierarchy.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeConfiguration.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/ThemeRenderer.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/WordPress/IntegrationTest.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/WordPress/ObjectsTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SymPress.Formatting.AlphabeticalUseStatements.MustBeSortedAlphabetically">
+        <exclude-pattern>*/src/DependencyInjection/Compiler/WordPressPass.php$</exclude-pattern>
+        <exclude-pattern>*/src/DependencyInjection/SymPressTwigExtension.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/TwigBundleTest.php$</exclude-pattern>
+        <exclude-pattern>*/tests/Unit/WordPress/IntegrationTest.php$</exclude-pattern>
+    </rule>
+
+    <rule ref="SymPress.Functions.FunctionLength.TooLong">
+        <exclude-pattern>*/src/WordPress/TemplateHierarchy.php$</exclude-pattern>
     </rule>
 
     <rule ref="SymPress.Namespaces.Psr4">

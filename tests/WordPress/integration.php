@@ -94,3 +94,16 @@ $selected = apply_filters('template_include', get_template_directory() . '/index
 $assert(str_ends_with($selected, '/Resources/wordpress/template.php'), 'Native template_include selects Twig.');
 $assert(trim($renderer->render('custom/landing')) === 'child landing', 'Child views override parent views.');
 echo "PASS: native template interception and child override.\n";
+
+$paragraphs = $renderer->renderBlock('security', 'paragraphs', ['value' => '<script>alert("x")</script> & text']);
+$assert(str_contains($paragraphs, '<p>'), 'wpautop retains paragraph markup.');
+$assert(!str_contains($paragraphs, '<script>') && str_contains($paragraphs, '&lt;script&gt;'), 'wpautop escapes untrusted HTML before formatting.');
+add_shortcode('twig_security_fixture', static fn (): string => '<strong>Allowed</strong><script>alert(1)</script><img src="x" onerror="alert(1)"><a href="javascript:alert(1)">link</a>');
+try {
+    $shortcodes = $renderer->renderBlock('security', 'shortcodes', ['value' => '<script>input</script>[twig_security_fixture]']);
+    $assert(str_contains($shortcodes, '<strong>Allowed</strong>'), 'shortcodes preserve permitted WordPress post HTML.');
+    $assert(!str_contains($shortcodes, '<script') && !str_contains($shortcodes, 'onerror') && !str_contains($shortcodes, 'javascript:'), 'shortcodes sanitize both literal input HTML and callback output.');
+} finally {
+    remove_shortcode('twig_security_fixture');
+}
+echo "PASS: safe paragraph and shortcode filters under real WordPress.\n";
