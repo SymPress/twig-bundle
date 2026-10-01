@@ -21,6 +21,7 @@ use SymPress\TwigBundle\WordPress\Lint\NoRawFilter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
+use Twig\Error\RuntimeError;
 use Twig\Loader\ArrayLoader;
 use Twig\Loader\FilesystemLoader;
 use SymPress\TwigBundle\WordPress\CustomTemplates;
@@ -225,6 +226,29 @@ final class IntegrationTest extends WordPressTestCase
         $inactive->addExtension(WordPressExtension::create($config));
         self::assertNotSame($active->getTemplateClass('date'), $inactive->getTemplateClass('date'));
         self::assertNull($inactive->getFunction('menu'));
+    }
+
+    public function testWordPressEscapersAreNotRegisteredAsTwigStrategies(): void
+    {
+        Functions\when('get_template')->justReturn('parent');
+        Functions\when('get_stylesheet')->justReturn('parent');
+        Functions\when('get_template_directory')->justReturn('/missing');
+        Functions\when('get_stylesheet_directory')->justReturn('/missing');
+        Functions\when('wp_is_block_theme')->justReturn(false);
+        Functions\when('is_admin')->justReturn(false);
+        Functions\when('esc_url')->justReturn('https://x.de/?a=1&#038;b=2');
+        $config = new ThemeConfiguration(['parent' => []]);
+        $loader = new FilesystemLoader();
+        $twig = new Environment($loader, ['autoescape' => 'html']);
+        $hierarchy = new TemplateHierarchy();
+        $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), $config);
+        (new Integration($config, $twig, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer)))->activate();
+        try {
+            $twig->createTemplate('{{ value|e("esc_url") }}')->render(['value' => 'https://x.de/?a=1&b=2']);
+            self::fail('WordPress escaping must use the HTML-safe filters.');
+        } catch (RuntimeError $error) {
+            self::assertStringContainsString('Invalid escaping strategy "esc_url"', $error->getMessage());
+        }
     }
 
     /** @param array<string, string> $templates */

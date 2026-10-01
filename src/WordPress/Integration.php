@@ -6,7 +6,6 @@ namespace SymPress\TwigBundle\WordPress;
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Twig\Runtime\EscaperRuntime;
 
 /** @internal */
 final class Integration
@@ -15,7 +14,7 @@ final class Integration
 
     public function __construct(
         private readonly ThemeConfiguration $configuration,
-        private readonly Environment $twig,
+        Environment $twig,
         private readonly FilesystemLoader $loader,
         private readonly TemplateHierarchy $hierarchy,
         private readonly TemplateInclude $include,
@@ -36,10 +35,6 @@ final class Integration
             $this->loader->addPath($path, 'theme');
         }
         $this->loader->addPath(dirname(__DIR__, 2) . '/Resources/views', 'wordpress');
-        $escaper = $this->twig->getRuntime(EscaperRuntime::class);
-        foreach (['esc_html', 'esc_attr', 'esc_url', 'esc_js', 'wp_kses_post'] as $strategy) {
-            $escaper->setEscaper($strategy, static fn (string $value, string $charset): string => $strategy($value));
-        }
         $this->hierarchy->register();
         if (!$this->configuration->templateInclude) {
             return;

@@ -18,7 +18,7 @@ promise. Its contracts are described in [wordpress.md](wordpress.md).
 - The documented query context, `Site`, `PostCollection` iteration/count,
   `Post`/`Term` accessors, `Image`, `Menu`/`MenuItem`,
   `Pagination`/`PaginationLink` and `MetaResolverInterface`.
-- All Twig functions, filters and escaping strategies listed in the WordPress
+- All Twig functions and filters listed in the WordPress
   reference; `@theme` child-first lookup; `@wordpress/document.html.twig` and
   its `head`/`body` blocks; `Lint\NoRawFilter` for lint environments.
 - Existing non-WordPress renderer, global-provider and bundle APIs remain supported.
@@ -41,6 +41,8 @@ optional features. Breaking supported changes require a new major release.
 Deprecations are announced in the changelog and upgrade guide with a replacement,
 remain available through the current major, and are removed no earlier than the
 next major. A security fix may restrict unsafe input; its impact is documented.
+The unsafe custom WordPress escape strategies were withdrawn in 1.1.2; use the
+documented WordPress filters instead. Twig's own escape strategies are unchanged.
 There is no promise of compatibility for undocumented/internal implementation
 details, WordPress plugin internals, or changes in upstream supported APIs.
 

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
+## 1.1.2 - 2026-10-01
+
+- Withdraw custom WordPress escape strategies that double-escaped entities under
+  Twig HTML autoescaping. Use `value|esc_url` and the other WordPress filters
+  instead of `value|e('esc_url')`; standard Twig strategies remain unchanged.
+- Accept null text/HTML input as an empty string and return empty output for null
+  `time_ago`/`size_format` values, avoiding errors for missing metadata/ACF fields.
+- Test URL entity preservation and nullable filters with Twig 3.30 and real WordPress.
+
 ## 1.1.1 - 2026-10-01
 
 - Escape untrusted `wpautop` input before paragraph formatting and sanitize

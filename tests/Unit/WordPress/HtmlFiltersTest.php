@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace SymPress\TwigBundle\Tests\Unit\WordPress;
 
 use Brain\Monkey\Functions;
+use SymPress\TwigBundle\WordPress\Runtime\EscapingRuntime;
 use SymPress\TwigBundle\WordPress\Runtime\TemplateRuntime;
 use Twig\Environment;
 use Twig\Extension\AttributeExtension;
@@ -67,11 +68,43 @@ final class HtmlFiltersTest extends WordPressTestCase
         self::assertSame('01.01.1970 01:00|01.01.1970 01:00', $template->render(['value' => 0]));
     }
 
+    public function testWordPressUrlFilterDoesNotEscapeEntitiesTwice(): void
+    {
+        Functions\when('esc_url')->justReturn('https://x.de/?a=1&#038;b=2');
+        $template = $this->twig()->createTemplate('<a href="{{ value|esc_url }}">link</a>');
+        $output = $template->render(['value' => 'https://x.de/?a=1&b=2']);
+        self::assertSame('<a href="https://x.de/?a=1&#038;b=2">link</a>', $output);
+    }
+
+    public function testNullableWordPressFiltersRenderEmptyStrings(): void
+    {
+        $functions = [
+            'esc_html', 'esc_attr', 'esc_url', 'esc_js', 'wp_kses_post', 'wp_kses', 'wpautop',
+            'do_shortcode', 'strip_shortcodes', 'wp_strip_all_tags', 'wp_trim_words',
+        ];
+        foreach ($functions as $function) {
+            Functions\when($function)->justReturn('');
+        }
+        $twig = $this->twig();
+        $filters = [
+            'esc_html', 'esc_attr', 'esc_url', 'esc_js', 'wp_kses_post', 'wp_kses([])', 'wpautop',
+            'shortcodes', 'stripshortcodes', 'excerpt', 'time_ago', 'size_format',
+        ];
+        foreach ($filters as $filter) {
+            $template = $twig->createTemplate('{% autoescape false %}{{ value|' . $filter . ' }}{% endautoescape %}');
+            self::assertSame('', $template->render(['value' => null]), $filter);
+        }
+    }
+
     private function twig(): Environment
     {
         $twig = new Environment(new ArrayLoader(), ['autoescape' => 'html']);
         $twig->addExtension(new AttributeExtension(TemplateRuntime::class));
-        $twig->addRuntimeLoader(new FactoryRuntimeLoader([TemplateRuntime::class => static fn (): TemplateRuntime => new TemplateRuntime()]));
+        $twig->addExtension(new AttributeExtension(EscapingRuntime::class));
+        $twig->addRuntimeLoader(new FactoryRuntimeLoader([
+            TemplateRuntime::class => static fn (): TemplateRuntime => new TemplateRuntime(),
+            EscapingRuntime::class => static fn (): EscapingRuntime => new EscapingRuntime(),
+        ]));
         return $twig;
     }
 }

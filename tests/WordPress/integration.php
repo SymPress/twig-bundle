@@ -107,3 +107,7 @@ try {
     remove_shortcode('twig_security_fixture');
 }
 echo "PASS: safe paragraph and shortcode filters under real WordPress.\n";
+$url = 'https://x.de/?a=1&b=2';
+$assert($renderer->renderBlock('security', 'url', ['value' => $url]) === '<a href="' . esc_url($url) . '">link</a>', 'WordPress URL filters preserve query parameters without double escaping.');
+$assert($renderer->renderBlock('security', 'nulls', ['value' => null]) === '', 'Nullable metadata passes all WordPress filters without TypeError.');
+echo "PASS: URL escaping and null metadata under real WordPress.\n";
