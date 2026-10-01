@@ -18,12 +18,12 @@
         "symfony/http-kernel": "^8.1",
         "symfony/twig-bridge": "^8.1",
         "symfony/twig-bundle": "^8.1",
-        "sympress/framework-bundle": "dev-main",
-        "sympress/kernel": "dev-main",
+        "sympress/framework-bundle": "^1.0.1",
+        "sympress/kernel": "^1.1",
         "twig/twig": "^3.22"
     },
     "require-dev": {
-        "sympress/qa": "dev-main"
+        "sympress/qa": "^0.1"
     },
     "autoload": {
         "psr-4": {
@@ -77,13 +77,6 @@
     },
     "repositories": [
         {
-            "type": "path",
-            "url": "./../*",
-            "options": {
-                "symlink": true
-            }
-        },
-        {
             "type": "vcs",
             "url": "https://github.com/SymPress/coding-standards.git"
         },
@@ -110,6 +103,6 @@
         "symfony/workflow": "Enables workflow Twig helpers.",
         "symfony/yaml": "Enables yaml_encode and yaml_dump Twig helpers."
     },
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "prefer-stable": true
 }
