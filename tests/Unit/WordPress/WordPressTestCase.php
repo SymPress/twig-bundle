@@ -13,6 +13,7 @@ abstract class WordPressTestCase extends TestCase
     {
         parent::setUp();
         Monkey\setUp();
+        do_action('after_setup_theme');
         Monkey\Functions\when('wp_doing_ajax')->justReturn(false);
     }
 

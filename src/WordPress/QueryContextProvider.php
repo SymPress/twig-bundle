@@ -35,7 +35,7 @@ final class QueryContextProvider
             'posts' => new PostCollection($query, $this->posts),
             'post' => $post,
             'term' => $object instanceof \WP_Term ? $this->terms->from($object) : null,
-            'author' => $object instanceof \WP_User ? $object : null,
+            'author' => $object instanceof \WP_User ? new User($object) : null,
             'title' => Html::text($query->is_archive() ? get_the_archive_title() : ($post?->title() ?? (get_option('page_for_posts') ? get_the_title((int) get_option('page_for_posts')) : get_bloginfo('name')))),
             'description' => Html::trusted($query->is_archive() ? get_the_archive_description() : ''),
             'search_query' => (string) $query->get('s'),

@@ -14,7 +14,7 @@ final readonly class Menu
     }
 
     /**
-     * @param array{depth?: int} $args
+     * @param array<string, mixed> $args Native wp_nav_menu arguments; object collection owns the walker.
      */
     public static function at(string $location, array $args = []): self
     {
@@ -22,35 +22,20 @@ final readonly class Menu
         if (!$id) {
             return new self();
         }
-        $items = wp_get_nav_menu_items($id) ?: [];
-        _wp_menu_item_classes_by_context($items);
-        $items = apply_filters('wp_nav_menu_objects', $items, (object) ['theme_location' => $location, 'menu' => $id, 'depth' => $args['depth'] ?? 0]);
-        return new self(self::children($items, 0, (int) ($args['depth'] ?? 0), []));
-    }
-
-    /**
-     * @param array<\WP_Post&object{menu_item_parent: int|string, title: string, url: string, current: bool, classes: list<string>, target: string, xfn: string}> $items
-     * @param list<int> $seen
-     * @return list<MenuItem>
-     */
-    private static function children(array $items, int $parent, int $depth, array $seen): array
-    {
-        $children = [];
-        foreach ($items as $item) {
-            if ((int) $item->menu_item_parent !== $parent || in_array($item->ID, $seen, true)) {
-                continue;
-            }
-            $children[] = new MenuItem(
-                $item->ID,
-                Html::text($item->title),
-                esc_url_raw($item->url),
-                (bool) $item->current,
-                array_values(array_filter($item->classes)),
-                $depth === 1 ? [] : self::children($items, $item->ID, max(0, $depth - 1), [...$seen, $item->ID]),
-                $item->target,
-                $item->xfn,
-            );
+        $menu = wp_get_nav_menu_object($id);
+        if (!$menu) {
+            return new self();
         }
-        return $children;
+        $walker = new MenuWalker();
+        wp_nav_menu([
+        ...$args, 'menu' => $menu,
+        'theme_location' => $location,
+            'echo'       => false,
+        'fallback_cb'    => false,
+        'container'      => false,
+            'items_wrap' => '%3$s',
+        'walker'         => $walker,
+        ]);
+        return new self($walker->getItems());
     }
 }

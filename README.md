@@ -11,6 +11,8 @@ core feature set to Symfony's `symfony/twig-bundle`.
 For registered classic WordPress themes, the optional [WordPress layer](docs/wordpress.md)
 provides child-aware template loading, lazy models, composers, menus and pagination
 without a second Twig environment.
+Version 1.2 also supports admin/early rendering, public author profiles and
+DI-aware readonly models. See [the upgrade guide](UPGRADE-1.2.md).
 
 ## Installation
 

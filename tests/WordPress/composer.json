@@ -2,6 +2,9 @@
   "name": "sympress/twig-wordpress-tests",
   "type": "project",
   "license": "GPL-2.0-or-later",
+  "autoload": {
+    "psr-4": { "SymPress\\TwigFixture\\": "src/" }
+  },
   "require": {
     "roots/wordpress": "^7.1.1",
     "sympress/twig-bundle": "@dev",

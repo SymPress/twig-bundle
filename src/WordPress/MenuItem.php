@@ -19,6 +19,8 @@ final readonly class MenuItem
         public array $children = [],
         public string $target = '',
         public string $rel = '',
+        public string $description = '',
+        public string $attr_title = '',
     ) {
     }
 }

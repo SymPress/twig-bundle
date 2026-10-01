@@ -16,7 +16,7 @@ promise. Its contracts are described in [wordpress.md](wordpress.md).
   `TemplateHierarchy::forQuery()`, `ThemeRenderer::render()`, `renderCurrent()`,
   `renderBlock()`, `resolved()`, and the namespaced `render()` function.
 - The documented query context, `Site`, `PostCollection` iteration/count,
-  `Post`/`Term` accessors, `Image`, `Menu`/`MenuItem`,
+  `Post`/`Term` accessors, public-only `User`, `Image`, `Menu`/`MenuItem`,
   `Pagination`/`PaginationLink` and `MetaResolverInterface`.
 - All Twig functions and filters listed in the WordPress
   reference; `@theme` child-first lookup; `@wordpress/document.html.twig` and
@@ -28,6 +28,10 @@ Use factories or Twig helpers for value objects. Their internal construction,
 service wiring, runtime classes, hierarchy capture and PHP interception are not
 extension points. Classes marked `@internal` may change in minor releases.
 Undocumented methods of the supported services are implementation details.
+In 1.2, readonly model constructors support container-injected services after
+the first native-object argument. Existing base constructors remain supported.
+Native user secrets are intentionally excluded from the public author profile;
+see [UPGRADE-1.2.md](../UPGRADE-1.2.md) for migration and cache rebuilding.
 
 Menu and pagination markup belongs in templates. ACF support is optional inside
 this package, enabled by availability of `get_field_object()`; no ACF dependency

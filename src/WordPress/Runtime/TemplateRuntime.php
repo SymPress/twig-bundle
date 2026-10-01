@@ -11,6 +11,8 @@ use SymPress\TwigBundle\WordPress\Post;
 use SymPress\TwigBundle\WordPress\PostScope;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
+use Twig\Environment;
+use Twig\Extension\CoreExtension;
 
 /** @internal */
 final class TemplateRuntime
@@ -58,7 +60,7 @@ final class TemplateRuntime
     }
 
     /**
-     * @param array{depth?: int} $args
+     * @param array<string, mixed> $args
      */
     #[AsTwigFunction('menu')]
     public function menu(string $location, array $args = []): Menu
@@ -176,9 +178,14 @@ final class TemplateRuntime
 
     #[AsTwigFilter('date')]
     #[AsTwigFilter('wp_date')]
-    public function date(\DateTimeInterface|int|string|null $value, ?string $format = null, \DateTimeZone|string|false|null $timezone = null): string
+    public function date(Environment $twig, \DateInterval|\DateTimeInterface|int|string|null $value, ?string $format = null, \DateTimeZone|string|false|null $timezone = null): string
     {
-        $zone = $timezone instanceof \DateTimeZone ? $timezone : (is_string($timezone) ? new \DateTimeZone($timezone) : wp_timezone());
+        if ($value instanceof \DateInterval) {
+            return $twig->getExtension(CoreExtension::class)->formatDate($value, $format, $timezone);
+        }
+        $zone = $timezone === false && $value instanceof \DateTimeInterface
+            ? $value->getTimezone()
+            : ($timezone instanceof \DateTimeZone ? $timezone : (is_string($timezone) ? new \DateTimeZone($timezone) : wp_timezone()));
         return (string) wp_date(
             $format ?? (string) get_option('date_format'),
             $value instanceof \DateTimeInterface ? $value->getTimestamp() : (is_int($value) || (is_string($value) && ctype_digit($value)) ? (int) $value : (new \DateTimeImmutable($value ?? 'now', $zone))->getTimestamp()),

@@ -15,7 +15,7 @@ final class WordPressExtension extends AbstractExtension
 {
     public static function create(ThemeConfiguration $configuration): AbstractExtension
     {
-        return $configuration->active() === null ? new InactiveWordPressExtension() : new self($configuration);
+        return $configuration->selected() === null ? new InactiveWordPressExtension() : new self($configuration);
     }
 
     public function __construct(private readonly ThemeConfiguration $configuration)
@@ -45,7 +45,7 @@ final class WordPressExtension extends AbstractExtension
     /** @return list<AttributeExtension> */
     private function extensions(): array
     {
-        if ($this->configuration->active() === null) {
+        if ($this->configuration->selected() === null) {
             return [];
         }
         return array_map(static fn (string $runtime): AttributeExtension => new AttributeExtension($runtime), [

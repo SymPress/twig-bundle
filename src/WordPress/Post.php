@@ -90,4 +90,30 @@ readonly class Post
         // Protected content must not leak through template metadata.
         return $this->protected() ? null : $this->metaResolver->resolve($this->wpPost, $key);
     }
+
+    public function author(): ?User
+    {
+        if ($this->protected()) {
+            return null;
+        }
+        if (!property_exists($this->cache, 'author')) {
+            $user = get_userdata((int) $this->wpPost->post_author);
+            $this->cache->author = $user instanceof \WP_User ? new User($user) : null;
+        }
+        return $this->cache->author;
+    }
+
+    /** @return list<Term> */
+    public function terms(string $taxonomy): array
+    {
+        if ($this->protected()) {
+            return [];
+        }
+        $key = 'terms_' . $taxonomy;
+        if (!isset($this->cache->{$key})) {
+            $terms = get_the_terms($this->wpPost, $taxonomy);
+            $this->cache->{$key} = is_array($terms) ? array_map($this->terms->from(...), array_values($terms)) : [];
+        }
+        return $this->cache->{$key};
+    }
 }

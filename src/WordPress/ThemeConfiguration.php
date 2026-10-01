@@ -36,10 +36,14 @@ final readonly class ThemeConfiguration
      */
     public function selected(): ?array
     {
-        if (!function_exists('get_stylesheet') || wp_is_block_theme()) {
+        if (!function_exists('get_stylesheet')) {
             return null;
         }
         $config = $this->themes[get_stylesheet()] ?? $this->themes[get_template()] ?? null;
+        // Theme roots are not registered during MU-plugin boot.
+        if ($config !== null && did_action('after_setup_theme') && wp_is_block_theme()) {
+            return null;
+        }
         return $config === null ? null : array_replace([
             'views_dir' => 'resources/views',
             'page_templates_dir' => 'custom',
@@ -49,7 +53,7 @@ final readonly class ThemeConfiguration
 
     public function textDomain(): string
     {
-        return $this->active()['text_domain'] ?? (function_exists('wp_get_theme') ? (string) wp_get_theme()->get('TextDomain') : 'default');
+        return $this->selected()['text_domain'] ?? (function_exists('wp_get_theme') ? (string) wp_get_theme()->get('TextDomain') : 'default');
     }
 
     /**
