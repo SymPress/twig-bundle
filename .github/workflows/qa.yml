@@ -12,14 +12,22 @@ permissions:
 
 jobs:
   wordpress:
-    uses: sympress/workflows/.github/workflows/ddev-playwright.yml@177fa0d727b278d2103052ec77c102b4a4c492a0
-    with:
-      php_version: '8.5'
-      node_version: '24'
-      allow_custom_commands: true
-      setup_command: ddev exec bash tests/WordPress/setup.sh
-      playwright_install_command: 'true'
-      playwright_run_command: ddev exec bash tests/WordPress/run.sh
+    name: WordPress integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ddev/github-action-setup-ddev@fdf2f5c97943bae638f31df6df86f1defa6210c0 # v1
+        with:
+          autostart: false
+      - run: ddev config --php-version 8.5 --web-environment-add=CI=true
+      - run: ddev start
+      - run: ddev exec bash tests/WordPress/setup.sh
+      - run: ddev exec bash tests/WordPress/run.sh
+      - if: ${{ always() }}
+        run: ddev stop --unlist
 
   workflows:
     uses: sympress/workflows/.github/workflows/lint-workflows.yml@177fa0d727b278d2103052ec77c102b4a4c492a0
