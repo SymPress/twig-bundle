@@ -42,7 +42,8 @@ final class SymPressTwigExtension extends Extension
             $container->register($class)->setAutowired(true)->setPublic(true);
         }
         $container->setAlias(WordPress\MetaResolverInterface::class, WordPress\MetaResolver::class);
-        $container->register(WordPress\TermFactory::class, WordPress\TermFactory::class);
+        $container->register(WordPress\TermFactory::class, WordPress\TermFactory::class)->setAutowired(true);
+        $container->register(WordPress\ModelInstantiator::class, WordPress\ModelInstantiator::class);
         $container->getDefinition(WordPress\MetaResolver::class)->setArgument('$postFactory', new ServiceClosureArgument(new Reference(WordPress\PostFactory::class)));
         $container->getDefinition(WordPress\Integration::class)->setArgument('$loader', new Reference('twig.loader.native_filesystem'));
         foreach ([WordPress\Runtime\TemplateRuntime::class, WordPress\Runtime\TranslationRuntime::class, WordPress\Runtime\EscapingRuntime::class, WordPress\Runtime\QueryRuntime::class] as $class) {

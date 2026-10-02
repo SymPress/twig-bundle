@@ -1,2 +1,4 @@
 {% block paragraphs %}{{ value|wpautop }}{% endblock %}
 {% block shortcodes %}{{ value|shortcodes }}{% endblock %}
+{% block url %}<a href="{{ value|esc_url }}">link</a>{% endblock %}
+{% block nulls %}{{ value|esc_html }}{{ value|esc_attr }}{{ value|esc_url }}{{ value|esc_js }}{{ value|wp_kses_post }}{{ value|wp_kses([]) }}{{ value|wpautop }}{{ value|shortcodes }}{{ value|stripshortcodes }}{{ value|excerpt }}{{ value|time_ago }}{{ value|size_format }}{% endblock %}

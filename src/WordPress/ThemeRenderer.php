@@ -26,7 +26,7 @@ final class ThemeRenderer
 
     public function renderCurrent(): string
     {
-        return $this->renderCandidates($this->currentCandidates ?? $this->candidates($this->hierarchy->current()), []);
+        return $this->renderCandidates($this->currentCandidates ?? $this->candidates($this->hierarchy->current()), [], true);
     }
 
     /** @param list<string> $candidates */
@@ -77,12 +77,12 @@ final class ThemeRenderer
      * @param list<string> $candidates
      * @param array<string, mixed> $context
      */
-    private function renderCandidates(array $candidates, array $context): string
+    private function renderCandidates(array $candidates, array $context, bool $current = false): string
     {
         $template = $this->resolve($candidates) ?? throw new \RuntimeException('No @theme template found, including index.html.twig.');
         $this->lastResolved = $template;
         $html = $this->twig->render($template, $this->compose($template, $candidates, $context));
-        if ($this->configuration->debugComment) {
+        if ($current && $this->configuration->debugComment) {
             $debug = str_replace(['--', '<', '>'], ['- -', '&lt;', '&gt;'], $template . ' [' . implode(', ', $candidates) . ']');
             $html .= "\n<!-- twig: " . $debug . ' -->';
         }

@@ -38,7 +38,10 @@ final readonly class PostCollection implements \IteratorAggregate, \Countable
         $state = [$this->query->current_post, $this->query->in_the_loop, $this->query->before_loop, $this->query->post ?? null];
         $ended = false;
         try {
-            $GLOBALS['wp_query'] = $this->query; // phpcs:ignore SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable -- Native WordPress loop context.
+            // Native secondary loops replace post globals, not the main query.
+            if ($this->query === ($GLOBALS['wp_the_query'] ?? null)) { // phpcs:ignore SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable -- Native main-query identity.
+                $GLOBALS['wp_query'] = $this->query; // phpcs:ignore SlevomatCodingStandard.Variables.DisallowSuperGlobalVariable -- Restore the native main query.
+            }
             $this->query->rewind_posts();
             while ($this->query->have_posts()) {
                 $this->query->the_post();

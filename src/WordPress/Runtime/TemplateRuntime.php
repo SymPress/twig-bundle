@@ -11,6 +11,8 @@ use SymPress\TwigBundle\WordPress\Post;
 use SymPress\TwigBundle\WordPress\PostScope;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
+use Twig\Environment;
+use Twig\Extension\CoreExtension;
 
 /** @internal */
 final class TemplateRuntime
@@ -58,7 +60,7 @@ final class TemplateRuntime
     }
 
     /**
-     * @param array{depth?: int} $args
+     * @param array<string, mixed> $args
      */
     #[AsTwigFunction('menu')]
     public function menu(string $location, array $args = []): Menu
@@ -139,46 +141,51 @@ final class TemplateRuntime
     }
 
     #[AsTwigFilter('wpautop', isSafe: ['html'], preEscape: 'html')]
-    public function paragraphs(string $value): string
+    public function paragraphs(?string $value): string
     {
-        return wpautop($value);
+        return wpautop($value ?? '');
     }
 
     #[AsTwigFilter('shortcodes', isSafe: ['html'])]
-    public function shortcodes(string $value): string
+    public function shortcodes(?string $value): string
     {
-        return wp_kses_post(do_shortcode($value));
+        return wp_kses_post(do_shortcode($value ?? ''));
     }
 
     #[AsTwigFilter('stripshortcodes')]
-    public function stripShortcodes(string $value): string
+    public function stripShortcodes(?string $value): string
     {
-        return strip_shortcodes($value);
+        return strip_shortcodes($value ?? '');
     }
 
     #[AsTwigFilter('excerpt')]
-    public function excerpt(string $value, int $words = 30): string
+    public function excerpt(?string $value, int $words = 30): string
     {
-        return wp_trim_words(Html::text(strip_shortcodes($value)), $words, '…');
+        return wp_trim_words(Html::text(strip_shortcodes($value ?? '')), $words, '…');
     }
 
     #[AsTwigFilter('time_ago')]
-    public function timeAgo(int $timestamp, ?int $now = null): string
+    public function timeAgo(?int $timestamp, ?int $now = null): string
     {
-        return human_time_diff($timestamp, $now ?? time());
+        return $timestamp === null ? '' : human_time_diff($timestamp, $now ?? time());
     }
 
     #[AsTwigFilter('size_format')]
-    public function size(int|float|string $bytes, int $decimals = 0): string
+    public function size(int|float|string|null $bytes, int $decimals = 0): string
     {
-        return (string) size_format(is_float($bytes) ? (int) $bytes : $bytes, $decimals);
+        return $bytes === null ? '' : (string) size_format(is_float($bytes) ? (int) $bytes : $bytes, $decimals);
     }
 
     #[AsTwigFilter('date')]
     #[AsTwigFilter('wp_date')]
-    public function date(\DateTimeInterface|int|string|null $value, ?string $format = null, \DateTimeZone|string|false|null $timezone = null): string
+    public function date(Environment $twig, \DateInterval|\DateTimeInterface|int|string|null $value, ?string $format = null, \DateTimeZone|string|false|null $timezone = null): string
     {
-        $zone = $timezone instanceof \DateTimeZone ? $timezone : (is_string($timezone) ? new \DateTimeZone($timezone) : wp_timezone());
+        if ($value instanceof \DateInterval) {
+            return $twig->getExtension(CoreExtension::class)->formatDate($value, $format, $timezone);
+        }
+        $zone = $timezone === false && $value instanceof \DateTimeInterface
+            ? $value->getTimezone()
+            : ($timezone instanceof \DateTimeZone ? $timezone : (is_string($timezone) ? new \DateTimeZone($timezone) : wp_timezone()));
         return (string) wp_date(
             $format ?? (string) get_option('date_format'),
             $value instanceof \DateTimeInterface ? $value->getTimestamp() : (is_int($value) || (is_string($value) && ctype_digit($value)) ? (int) $value : (new \DateTimeImmutable($value ?? 'now', $zone))->getTimestamp()),

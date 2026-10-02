@@ -13,6 +13,7 @@ use SymPress\TwigBundle\WordPress\Post;
 use SymPress\TwigBundle\WordPress\Runtime\TemplateRuntime;
 use SymPress\TwigBundle\WordPress\Runtime\TranslationRuntime;
 use SymPress\TwigBundle\WordPress\ThemeConfiguration;
+use SymPress\TwigBundle\WordPress\User;
 use Twig\Environment;
 use Twig\Extension\AttributeExtension;
 use Twig\Loader\ArrayLoader;
@@ -47,17 +48,29 @@ final class ObjectsTest extends WordPressTestCase
     public function testMenusKeepMarkupInTwigAndRespectDepthAndCurrentState(): void
     {
         Functions\when('get_nav_menu_locations')->justReturn(['primary' => 1]);
-        $parent = (object) ['ID' => 1, 'menu_item_parent' => 0, 'title' => 'A &amp; B', 'url' => '/?a=1&b=2', 'current' => true, 'classes' => ['current-menu-item'], 'target' => '', 'xfn' => ''];
+        $parent = new \WP_Post();
+        $parent->title = 'A &amp; B';
+        $parent->url = '/?a=1&b=2';
+        $parent->current = true;
+        $parent->classes = ['current-menu-item'];
+        $parent->description = 'Description';
+        $parent->attr_title = 'Tooltip';
         $child = clone $parent;
         $child->ID = 2;
         $child->menu_item_parent = 1;
-        Functions\when('wp_get_nav_menu_items')->justReturn([$parent, $child]);
-        Functions\when('_wp_menu_item_classes_by_context')->justReturn(null);
+        Functions\when('wp_get_nav_menu_object')->justReturn(new \WP_Term());
+        Functions\when('wp_nav_menu')->alias(static function (array $args) use ($parent, $child): string {
+            self::assertInstanceOf(\WP_Term::class, $args['menu']);
+            return $args['walker']->walk([$parent, $child], $args['depth'], (object) $args);
+        });
+        Functions\when('apply_filters')->alias(static fn (string $hook, mixed $value): mixed => $hook === 'nav_menu_item_title' ? $value . ' filtered' : $value);
         Functions\when('wp_strip_all_tags')->alias(strip_tags(...));
         Functions\when('esc_url_raw')->returnArg();
         $menu = Menu::at('primary', ['depth' => 2]);
         self::assertCount(1, $menu->items);
-        self::assertSame('A & B', $menu->items[0]->title);
+        self::assertSame('A & B filtered', $menu->items[0]->title);
+        self::assertSame('Description', $menu->items[0]->description);
+        self::assertSame('Tooltip', $menu->items[0]->attr_title);
         self::assertTrue($menu->items[0]->current);
         self::assertCount(1, $menu->items[0]->children);
         self::assertSame([], Menu::at('primary', ['depth' => 1])->items[0]->children);
@@ -85,7 +98,7 @@ final class ObjectsTest extends WordPressTestCase
         Functions\when('wp_timezone')->justReturn($zone);
         Functions\when('get_option')->justReturn('d.m.Y');
         Functions\expect('wp_date')->once()->with('d.m.Y', 1790812800, $zone)->andReturn('01.10.2026');
-        self::assertSame('01.10.2026', (new TemplateRuntime())->date(1790812800));
+        self::assertSame('01.10.2026', (new TemplateRuntime())->date(new Environment(new ArrayLoader()), 1790812800));
     }
 
     public function testTranslationsAreEscapedAndArbitraryFunctionsAreUnavailable(): void
@@ -97,5 +110,37 @@ final class ObjectsTest extends WordPressTestCase
         self::assertSame('&lt;b&gt;A &amp; B&lt;/b&gt;', $twig->render('test'));
         self::assertNull($twig->getFunction('fn'));
         self::assertNull($twig->getFunction('function'));
+    }
+
+    public function testDateIntervalsAndExplicitObjectTimezoneRemainSupported(): void
+    {
+        $twig = new Environment(new ArrayLoader());
+        $runtime = new TemplateRuntime();
+        self::assertSame('2 days', $runtime->date($twig, new \DateInterval('P2D'), '%d days'));
+        Functions\when('wp_date')->alias(static fn (string $format, int $stamp, \DateTimeZone $zone): string => (new \DateTimeImmutable('@' . $stamp))->setTimezone($zone)->format($format));
+        $date = new \DateTimeImmutable('2026-10-01 12:00:00', new \DateTimeZone('Asia/Tokyo'));
+        self::assertSame('12:00 +09:00', $runtime->date($twig, $date, 'H:i P', false));
+    }
+
+    public function testAuthorAndTermsAreLazyMemoizedAndDoNotExposeUserSecrets(): void
+    {
+        Functions\when('post_password_required')->justReturn(false);
+        Functions\when('wp_strip_all_tags')->alias(strip_tags(...));
+        Functions\expect('get_userdata')->once()->with(1)->andReturn(new \WP_User());
+        Functions\expect('get_the_terms')->once()->andReturn([new \WP_Term()]);
+        $post = new Post(new \WP_Post(), new MetaResolver());
+        $author = $post->author();
+        self::assertInstanceOf(User::class, $author);
+        self::assertSame($author, $post->author());
+        self::assertSame('Public author', $author->name());
+        self::assertStringNotContainsString('private-password-hash', serialize($author));
+        self::assertArrayNotHasKey('user_email', get_object_vars($author));
+        self::assertArrayNotHasKey('user_pass', get_object_vars($author));
+        self::assertCount(1, $post->terms('category'));
+        self::assertSame($post->terms('category'), $post->terms('category'));
+        Functions\when('post_password_required')->justReturn(true);
+        $protected = new Post(new \WP_Post(), new MetaResolver());
+        self::assertNull($protected->author());
+        self::assertSame([], $protected->terms('category'));
     }
 }

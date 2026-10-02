@@ -10,41 +10,41 @@ use Twig\Attribute\AsTwigFilter;
 final class EscapingRuntime
 {
     #[AsTwigFilter('esc_html', isSafe: ['html'])]
-    public function html(string $value): string
+    public function html(?string $value): string
     {
-        return esc_html($value);
+        return esc_html($value ?? '');
     }
 
     #[AsTwigFilter('esc_attr', isSafe: ['html'])]
-    public function attr(string $value): string
+    public function attr(?string $value): string
     {
-        return esc_attr($value);
+        return esc_attr($value ?? '');
     }
 
     #[AsTwigFilter('esc_url', isSafe: ['html'])]
-    public function url(string $value): string
+    public function url(?string $value): string
     {
-        return esc_url($value);
+        return esc_url($value ?? '');
     }
 
     #[AsTwigFilter('esc_js', isSafe: ['html'])]
-    public function js(string $value): string
+    public function js(?string $value): string
     {
-        return esc_js($value);
+        return esc_js($value ?? '');
     }
 
     #[AsTwigFilter('wp_kses_post', isSafe: ['html'])]
-    public function post(string $value): string
+    public function post(?string $value): string
     {
-        return wp_kses_post($value);
+        return wp_kses_post($value ?? '');
     }
 
     /**
      * @param array<string, array<string, bool>>|string $allowed
      */
     #[AsTwigFilter('wp_kses', isSafe: ['html'])]
-    public function kses(string $value, array|string $allowed): string
+    public function kses(?string $value, array|string $allowed): string
     {
-        return wp_kses($value, $allowed);
+        return wp_kses($value ?? '', $allowed);
     }
 }

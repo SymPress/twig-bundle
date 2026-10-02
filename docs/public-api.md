@@ -16,9 +16,9 @@ promise. Its contracts are described in [wordpress.md](wordpress.md).
   `TemplateHierarchy::forQuery()`, `ThemeRenderer::render()`, `renderCurrent()`,
   `renderBlock()`, `resolved()`, and the namespaced `render()` function.
 - The documented query context, `Site`, `PostCollection` iteration/count,
-  `Post`/`Term` accessors, `Image`, `Menu`/`MenuItem`,
+  `Post`/`Term` accessors, public-only `User`, `Image`, `Menu`/`MenuItem`,
   `Pagination`/`PaginationLink` and `MetaResolverInterface`.
-- All Twig functions, filters and escaping strategies listed in the WordPress
+- All Twig functions and filters listed in the WordPress
   reference; `@theme` child-first lookup; `@wordpress/document.html.twig` and
   its `head`/`body` blocks; `Lint\NoRawFilter` for lint environments.
 - Existing non-WordPress renderer, global-provider and bundle APIs remain supported.
@@ -28,6 +28,10 @@ Use factories or Twig helpers for value objects. Their internal construction,
 service wiring, runtime classes, hierarchy capture and PHP interception are not
 extension points. Classes marked `@internal` may change in minor releases.
 Undocumented methods of the supported services are implementation details.
+In 1.2, readonly model constructors support container-injected services after
+the first native-object argument. Existing base constructors remain supported.
+Native user secrets are intentionally excluded from the public author profile;
+see [UPGRADE-1.2.md](../UPGRADE-1.2.md) for migration and cache rebuilding.
 
 Menu and pagination markup belongs in templates. ACF support is optional inside
 this package, enabled by availability of `get_field_object()`; no ACF dependency
@@ -41,6 +45,8 @@ optional features. Breaking supported changes require a new major release.
 Deprecations are announced in the changelog and upgrade guide with a replacement,
 remain available through the current major, and are removed no earlier than the
 next major. A security fix may restrict unsafe input; its impact is documented.
+The unsafe custom WordPress escape strategies were withdrawn in 1.1.2; use the
+documented WordPress filters instead. Twig's own escape strategies are unchanged.
 There is no promise of compatibility for undocumented/internal implementation
 details, WordPress plugin internals, or changes in upstream supported APIs.
 

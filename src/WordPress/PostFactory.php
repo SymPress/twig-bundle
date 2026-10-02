@@ -12,12 +12,12 @@ final class PostFactory
     /**
      * @param array<string, class-string<Post>> $models
      */
-    public function __construct(private readonly MetaResolverInterface $meta, private readonly array $models = [], private readonly TermFactory $terms = new TermFactory())
+    public function __construct(private readonly MetaResolverInterface $meta, private readonly array $models = [], private readonly TermFactory $terms = new TermFactory(), private readonly ModelInstantiator $instantiator = new ModelInstantiator())
     {
     }
 
     public function from(\WP_Post $post): Post
     {
-        return $this->posts[$post->ID] ??= new ($this->models[$post->post_type] ?? Post::class)($post, $this->meta, $this->terms);
+        return $this->posts[$post->ID] ??= $this->instantiator->post($this->models[$post->post_type] ?? Post::class, $post, $this->meta, $this->terms);
     }
 }

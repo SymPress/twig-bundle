@@ -44,6 +44,7 @@
         <exclude-pattern>*/src/WordPress/TemplateContext.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/Term.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/ThemeConfiguration.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/User.php$</exclude-pattern>
     </rule>
 
     <rule ref="SlevomatCodingStandard.Commenting.RequireOneLineDocComment.MultiLineDocComment">
@@ -91,6 +92,14 @@
 
     <rule ref="SymPress.Classes.AccessorNaming.GetterRequired">
         <exclude-pattern>*/src/WordPress/ThemeRenderer.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/User.php$</exclude-pattern>
+    </rule>
+
+    <!-- Preserve the safe public WordPress profile aliases used by existing templates. -->
+    <rule ref="SymPress.NamingConventions.VariableName.SnakeCaseVar">
+        <exclude-pattern>*/src/WordPress/User.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MenuItem.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MenuWalker.php$</exclude-pattern>
     </rule>
 
     <rule ref="SymPress.Files.LineLength.TooLong">
@@ -102,6 +111,7 @@
         <exclude-pattern>*/src/WordPress/CustomTemplates.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/Lint/NoRawFilter.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/Menu.php$</exclude-pattern>
+        <exclude-pattern>*/src/WordPress/MenuWalker.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/MetaResolver.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/Pagination.php$</exclude-pattern>
         <exclude-pattern>*/src/WordPress/Post.php$</exclude-pattern>

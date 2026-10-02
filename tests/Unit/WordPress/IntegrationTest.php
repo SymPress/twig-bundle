@@ -21,6 +21,7 @@ use SymPress\TwigBundle\WordPress\Lint\NoRawFilter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Twig\Environment;
 use Twig\Error\SyntaxError;
+use Twig\Error\RuntimeError;
 use Twig\Loader\ArrayLoader;
 use Twig\Loader\FilesystemLoader;
 use SymPress\TwigBundle\WordPress\CustomTemplates;
@@ -72,6 +73,9 @@ final class IntegrationTest extends WordPressTestCase
         self::assertSame($input, $hierarchy->capture($input));
         $hierarchy->capture(['singular.php']);
         self::assertSame(['single-book-example', 'single-book', 'single', 'singular', 'index'], $hierarchy->current());
+        $hierarchy->register();
+        $hierarchy->reset();
+        self::assertSame(['index'], $hierarchy->current(), 'Earlier plugin template queries do not contaminate rendering.');
         self::assertSame(['custom/landing', 'index'], TemplateHierarchy::normalize(['../secret', '/etc/passwd', 'a/../b', 'a..b', 'x\\y', '@other/file', 'php:filter', "x\0y", 'custom/landing.html.twig', 'index.php']));
     }
 
@@ -100,7 +104,7 @@ final class IntegrationTest extends WordPressTestCase
             $hierarchy = new TemplateHierarchy();
             $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), $config);
             $custom = new CustomTemplates($config);
-            $integration = new Integration($config, $twig, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer));
+            $integration = new Integration($config, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer));
             $integration->activate();
             $integration->activate();
             self::assertSame('child', $renderer->render('index'));
@@ -222,9 +226,64 @@ final class IntegrationTest extends WordPressTestCase
         $active->addExtension(WordPressExtension::create($config));
         Functions\when('is_admin')->justReturn(true);
         $inactive = new Environment($loader);
-        $inactive->addExtension(WordPressExtension::create($config));
+        $inactive->addExtension(WordPressExtension::create(new ThemeConfiguration(['unrelated' => []])));
         self::assertNotSame($active->getTemplateClass('date'), $inactive->getTemplateClass('date'));
         self::assertNull($inactive->getFunction('menu'));
+    }
+
+    public function testWordPressEscapersAreNotRegisteredAsTwigStrategies(): void
+    {
+        Functions\when('get_template')->justReturn('parent');
+        Functions\when('get_stylesheet')->justReturn('parent');
+        Functions\when('get_template_directory')->justReturn('/missing');
+        Functions\when('get_stylesheet_directory')->justReturn('/missing');
+        Functions\when('wp_is_block_theme')->justReturn(false);
+        Functions\when('is_admin')->justReturn(false);
+        Functions\when('esc_url')->justReturn('https://x.de/?a=1&#038;b=2');
+        $config = new ThemeConfiguration(['parent' => []]);
+        $loader = new FilesystemLoader();
+        $twig = new Environment($loader, ['autoescape' => 'html']);
+        $hierarchy = new TemplateHierarchy();
+        $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), $config);
+        (new Integration($config, $loader, $hierarchy, new TemplateInclude($hierarchy, $renderer)))->activate();
+        try {
+            $twig->createTemplate('{{ value|e("esc_url") }}')->render(['value' => 'https://x.de/?a=1&b=2']);
+            self::fail('WordPress escaping must use the HTML-safe filters.');
+        } catch (RuntimeError $error) {
+            self::assertStringContainsString('Invalid escaping strategy "esc_url"', $error->getMessage());
+        }
+    }
+
+    public function testRegisteredThemeHelpersRemainAvailableInAdmin(): void
+    {
+        Functions\when('get_stylesheet')->justReturn('parent');
+        Functions\when('get_template')->justReturn('parent');
+        Functions\when('is_admin')->justReturn(true);
+        Functions\when('wp_is_block_theme')->justReturn(false);
+        $twig = new Environment(new ArrayLoader());
+        $twig->addExtension(WordPressExtension::create(new ThemeConfiguration(['parent' => []])));
+        self::assertNotNull($twig->getFunction('__'));
+        self::assertNotNull($twig->getFunction('menu'));
+    }
+
+    public function testDebugCommentIsLimitedToCurrentPageAndIndexComposerMatchesHierarchy(): void
+    {
+        $hierarchy = new TemplateHierarchy();
+        $hierarchy->capture(['page-contact.php']);
+        $composer = new class implements TemplateComposerInterface {
+            public function compose(TemplateContext $context): array
+            {
+                return ['message' => $context->template === '@theme/page-contact.html.twig' ? 'index composer' : 'unexpected'];
+            }
+        };
+        $twig = new Environment(new ArrayLoader(['@theme/page-contact.html.twig' => '{% block content %}{{ message }}{% endblock %}']));
+        $renderer = new ThemeRenderer($twig, $hierarchy, new QueryContextProvider(new PostFactory(new MetaResolver())), new ThemeConfiguration(debugComment: true), [
+            ['composer' => $composer, 'templates' => ['index'], 'priority' => 0],
+        ]);
+        self::assertStringContainsString('index composer', $renderer->renderCurrent());
+        self::assertStringContainsString('<!--', $renderer->renderCurrent());
+        self::assertSame('default', $renderer->render('page-contact', ['message' => 'default']));
+        self::assertSame('default', $renderer->renderBlock('page-contact', 'content', ['message' => 'default']));
     }
 
     /** @param array<string, string> $templates */
