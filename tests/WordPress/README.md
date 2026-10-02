@@ -1,9 +1,9 @@
 # Real WordPress integration
 
-The QA workflow runs this isolated DDEV fixture through the shared
-`ddev-playwright` workflow, overriding its test command with native WordPress
-checks. No browser is needed for bundle assertions. Theme browser coverage lives
-in theme-starter.
+The QA workflow runs this isolated DDEV fixture in its dedicated WordPress
+integration job. It installs the fixture's Composer dependencies and runs native
+WordPress checks. The library has no root JavaScript application or Playwright
+suite; Theme browser coverage lives in theme-starter.
 
 ```sh
 ddev start
