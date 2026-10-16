@@ -8,7 +8,7 @@
   "require": {
     "roots/wordpress": "^7.1.1",
     "sympress/twig-bundle": "@dev",
-    "symfony/yaml": "^8.1"
+    "symfony/yaml": "^8.1.6"
   },
   "repositories": [
     {
