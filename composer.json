@@ -14,12 +14,12 @@
         "php": "^8.5",
         "symfony/config": "^8.0",
         "symfony/dependency-injection": "^8.0",
-        "symfony/http-foundation": "^8.1",
+        "symfony/http-foundation": "^8.1.9",
         "symfony/http-kernel": "^8.1",
         "symfony/twig-bridge": "^8.1",
         "symfony/twig-bundle": "^8.1",
-        "sympress/framework-bundle": "^1.0.2",
-        "sympress/kernel": "^1.1.1",
+        "sympress/framework-bundle": "^1.0.7",
+        "sympress/kernel": "^1.1.10",
         "twig/twig": "^3.22"
     },
     "require-dev": {

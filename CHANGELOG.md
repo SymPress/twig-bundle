@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
+## 1.2.3 - 2026-10-16
+
+- Require Symfony HttpFoundation 8.1.9 or newer to exclude CVE-2026-108082
+  and include the follow-up fix for whitespace header separators.
+- Require patched SymPress Kernel and Framework Bundle releases so lowest
+  dependency resolution also excludes vulnerable ExpressionLanguage and YAML.
+- Require a patched Symfony YAML version in the WordPress integration fixture
+  to exclude CVE-2026-109413.
+- Cover Cache-Control parsing with long whitespace runs and whitespace separators.
+
 ## 1.2.0 - 2026-10-01
 
 - Make WordPress helpers and the shared document layout available to registered
