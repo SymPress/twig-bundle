@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
+## Unreleased
+
+- Add `svg()` to inline theme SVG files with child-to-parent fallback. Files
+  pass an element and attribute allowlist before crossing the Html boundary;
+  unnamed icons are hidden from assistive technology. Requires `ext-dom`.
+
 ## 1.2.3 - 2026-10-16
 
 - Require Symfony HttpFoundation 8.1.9 or newer to exclude CVE-2026-108082

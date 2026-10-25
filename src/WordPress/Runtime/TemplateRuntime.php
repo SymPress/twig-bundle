@@ -9,10 +9,12 @@ use SymPress\TwigBundle\WordPress\Menu;
 use SymPress\TwigBundle\WordPress\Pagination;
 use SymPress\TwigBundle\WordPress\Post;
 use SymPress\TwigBundle\WordPress\PostScope;
+use SymPress\TwigBundle\WordPress\Svg;
 use Twig\Attribute\AsTwigFilter;
 use Twig\Attribute\AsTwigFunction;
 use Twig\Environment;
 use Twig\Extension\CoreExtension;
+use Twig\Markup;
 
 /** @internal */
 final class TemplateRuntime
@@ -84,6 +86,15 @@ final class TemplateRuntime
     public function pagination(array $args = []): Pagination
     {
         return Pagination::forQuery(PostScope::query(), $args);
+    }
+
+    /**
+     * @param array<string, scalar|null> $attributes
+     */
+    #[AsTwigFunction('svg')]
+    public function svg(string $name, array $attributes = []): Markup
+    {
+        return Svg::inline($name, $attributes);
     }
 
     #[AsTwigFunction('sidebar', isSafe: ['html'])]
