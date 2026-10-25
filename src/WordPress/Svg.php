@@ -65,10 +65,8 @@ final class Svg
             return Html::trusted('');
         }
 
-        $document = new \DOMDocument();
-        $document->loadXML($markup, LIBXML_NONET);
-        $document->encoding = 'UTF-8';
-        $root = $document->documentElement;
+        $document = self::parse($markup);
+        $root = $document?->documentElement;
         if (!$root instanceof \DOMElement) {
             return Html::trusted('');
         }
@@ -133,6 +131,23 @@ final class Svg
         if (stripos($xml, '<!ENTITY') !== false) {
             return null;
         }
+        $document = self::parse($xml);
+        // Also catches declarations the byte check above misses, e.g. in UTF-16 files.
+        if ($document === null || ($document->doctype->internalSubset ?? '') !== '') {
+            return null;
+        }
+        $root = $document->documentElement;
+        if (!$root instanceof \DOMElement || $root->localName !== 'svg' || !self::isAllowedElement($root)) {
+            return null;
+        }
+        self::clean($root);
+        $markup = $document->saveXML($root);
+        return $markup === false ? null : $markup;
+    }
+
+    /** Recoverable libxml notices (e.g. an undeclared xlink prefix) must not surface as PHP warnings. */
+    private static function parse(string $xml): ?\DOMDocument
+    {
         $document = new \DOMDocument();
         $previous = libxml_use_internal_errors(true);
         try {
@@ -143,17 +158,7 @@ final class Svg
         }
         // Keep text such as umlauts in titles as UTF-8 instead of character references.
         $document->encoding = 'UTF-8';
-        $root = $document->documentElement;
-        // Also catches declarations the byte check above misses, e.g. in UTF-16 files.
-        if (!$loaded || ($document->doctype->internalSubset ?? '') !== '') {
-            return null;
-        }
-        if (!$root instanceof \DOMElement || $root->localName !== 'svg' || !self::isAllowedElement($root)) {
-            return null;
-        }
-        self::clean($root);
-        $markup = $document->saveXML($root);
-        return $markup === false ? null : $markup;
+        return $loaded ? $document : null;
     }
 
     private static function clean(\DOMElement $element): void

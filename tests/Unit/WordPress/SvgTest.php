@@ -119,6 +119,26 @@ final class SvgTest extends WordPressTestCase
         self::assertStringContainsString('<tspan>Ok &amp; fine</tspan>', $html);
     }
 
+    public function testUndeclaredXlinkPrefixRendersWithoutWarnings(): void
+    {
+        $this->file('parent/icons/legacy.svg', self::svg('<defs><path id="p" d="M0 0"/></defs><use xlink:href="#p"/>'));
+        $warnings = [];
+        set_error_handler(static function (int $level, string $message) use (&$warnings): bool {
+            $warnings[] = $message;
+            return true;
+        });
+        try {
+            $first = (string) Svg::inline('icons/legacy');
+            $second = (string) Svg::inline('icons/legacy', ['class' => 'icon']);
+        } finally {
+            restore_error_handler();
+        }
+
+        self::assertSame([], $warnings);
+        self::assertStringContainsString('xlink:href="#p"', $first);
+        self::assertStringContainsString('class="icon"', $second);
+    }
+
     public function testEntityDeclarationsAreRefused(): void
     {
         $doctype = '<?xml version="1.0"?><!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/passwd">]>';
