@@ -19,6 +19,7 @@ final class Svg
 {
     private const string NAMESPACE = 'http://www.w3.org/2000/svg';
     private const int MAX_BYTES = 512 * 1024;
+    private const string UNSAFE_CSS = '/expression\s*\(|image-set\s*\(|src\s*\(|@import|javascript:/i';
 
     /** Drawing, grouping and local references only: no script, style, foreignObject, image, a or animation. */
     private const array ELEMENTS = [
@@ -53,7 +54,7 @@ final class Svg
     /** @var array<string, string> Sanitized markup by path and modification time. */
     private static array $sanitized = [];
 
-    /** @param array<string, scalar|null> $attributes Root attributes; null removes one. */
+    /** @param array<array-key, mixed> $attributes Root attributes from templates; null removes one. */
     public static function inline(string $name, array $attributes = []): Markup
     {
         $path = self::locate($name);
@@ -72,6 +73,12 @@ final class Svg
             return Html::trusted('');
         }
         foreach ($attributes as $attribute => $value) {
+            $attribute = (string) $attribute;
+            if ($value !== null && !is_scalar($value) && !$value instanceof \Stringable) {
+                throw new \InvalidArgumentException(sprintf('The SVG attribute "%s" needs a text value.', $attribute));
+            }
+            // ARIA states need "true"/"false"; PHP would render true as "1".
+            $value = is_bool($value) ? ($value ? 'true' : 'false') : $value;
             if (!self::allows($attribute, (string) $value)) {
                 throw new \InvalidArgumentException(sprintf('The SVG attribute "%s" is not allowed.', $attribute));
             }
@@ -137,7 +144,11 @@ final class Svg
         // Keep text such as umlauts in titles as UTF-8 instead of character references.
         $document->encoding = 'UTF-8';
         $root = $document->documentElement;
-        if (!$loaded || !$root instanceof \DOMElement || $root->localName !== 'svg' || !self::isAllowedElement($root)) {
+        // Also catches declarations the byte check above misses, e.g. in UTF-16 files.
+        if (!$loaded || ($document->doctype->internalSubset ?? '') !== '') {
+            return null;
+        }
+        if (!$root instanceof \DOMElement || $root->localName !== 'svg' || !self::isAllowedElement($root)) {
             return null;
         }
         self::clean($root);
@@ -147,13 +158,14 @@ final class Svg
 
     private static function clean(\DOMElement $element): void
     {
-        foreach (iterator_to_array($element->attributes) as $attribute) {
+        // Without preserved keys: the map is keyed by local name, so onload and x:onload would collide.
+        foreach (iterator_to_array($element->attributes, false) as $attribute) {
             if (self::allows($attribute->nodeName, $attribute->value)) {
                 continue;
             }
             $element->removeAttributeNode($attribute);
         }
-        foreach (iterator_to_array($element->childNodes) as $child) {
+        foreach (iterator_to_array($element->childNodes, false) as $child) {
             if ($child instanceof \DOMElement && self::isAllowedElement($child)) {
                 self::clean($child);
             } elseif ($child instanceof \DOMCdataSection) {
@@ -170,7 +182,10 @@ final class Svg
         return $root->hasAttribute('aria-label')
             || $root->hasAttribute('aria-labelledby')
             || $root->hasAttribute('role')
-            || $root->getElementsByTagName('title')->length > 0;
+            || array_any(
+                iterator_to_array($root->childNodes, false),
+                static fn (\DOMNode $node): bool => $node->localName === 'title',
+            );
     }
 
     private static function isAllowedElement(\DOMElement $element): bool
@@ -187,7 +202,8 @@ final class Svg
             return str_starts_with(trim($value), '#');
         }
         // CSS escapes could hide url() or expression(); values never need backslashes.
-        if (str_contains($value, '\\') || preg_match('/expression\s*\(|@import|javascript:/i', $value)) {
+        // image-set() and src() load external images without url().
+        if (str_contains($value, '\\') || preg_match(self::UNSAFE_CSS, $value)) {
             return false;
         }
         // Paint servers, clip paths, masks and filters may only reference this document.

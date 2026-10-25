@@ -89,7 +89,7 @@ final class TemplateRuntime
     }
 
     /**
-     * @param array<string, scalar|null> $attributes
+     * @param array<array-key, mixed> $attributes
      */
     #[AsTwigFunction('svg')]
     public function svg(string $name, array $attributes = []): Markup

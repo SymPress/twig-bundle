@@ -99,6 +99,87 @@ final class SvgTest extends WordPressTestCase
         self::assertSame('', (string) Svg::inline('icons/xxe'));
     }
 
+    public function testAttributesSharingALocalNameAreAllChecked(): void
+    {
+        $this->file('parent/icons/collide.svg', <<<'SVG'
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:x="urn:x" xmlns:xlink="http://www.w3.org/1999/xlink"
+                 onload="alert(1)" x:onload="1">
+              <use xlink:href="#ok" href="https://evil.example/sprite.svg#icon"/>
+            </svg>
+            SVG);
+
+        $html = (string) Svg::inline('icons/collide');
+
+        self::assertStringNotContainsString('onload', $html);
+        self::assertStringNotContainsString('evil.example', $html);
+        self::assertStringContainsString('xlink:href="#ok"', $html);
+    }
+
+    public function testEntityDeclarationsAreRefusedInAnyEncoding(): void
+    {
+        $doctype = '<?xml version="1.0" encoding="UTF-16"?><!DOCTYPE svg [<!ENTITY x "boom">]>';
+        $xml = $doctype . self::svg('<text>&x;</text>');
+        $this->file('parent/icons/utf16.svg', "\xFF\xFE" . mb_convert_encoding($xml, 'UTF-16LE', 'UTF-8'));
+        Functions\expect('wp_trigger_error')->once();
+
+        self::assertSame('', (string) Svg::inline('icons/utf16'));
+    }
+
+    public function testCssFunctionsLoadingExternalImagesAreRemoved(): void
+    {
+        $this->file('parent/icons/css.svg', self::svg(
+            '<rect style="fill:red;background:image-set(\'https://tracker.example/a.png\' 1x)"/>'
+            . '<rect style="background:-webkit-image-set(&quot;https://tracker.example/b.png&quot; 1x)"/>'
+            . '<rect style="fill:#000;stroke:url(#g)"/>',
+        ));
+
+        $html = (string) Svg::inline('icons/css');
+
+        self::assertStringNotContainsString('tracker.example', $html);
+        self::assertStringContainsString('style="fill:#000;stroke:url(#g)"', $html);
+    }
+
+    public function testBooleanAriaValuesUseAriaTokens(): void
+    {
+        $this->file('parent/icons/menu.svg', self::svg('<path/>'));
+
+        $hidden = (string) Svg::inline('icons/menu', ['aria-hidden' => true]);
+        $exposed = (string) Svg::inline('icons/menu', ['aria-hidden' => false]);
+
+        self::assertStringContainsString('aria-hidden="true"', $hidden);
+        self::assertStringContainsString('aria-hidden="false"', $exposed);
+    }
+
+    public function testOnlyARootTitleNamesTheIcon(): void
+    {
+        $this->file('parent/icons/layer.svg', self::svg('<g><title>Layer 1</title><path/></g>'));
+
+        self::assertStringContainsString('aria-hidden="true"', (string) Svg::inline('icons/layer'));
+    }
+
+    public function testTemplateAttributeValuesMustBeTextual(): void
+    {
+        $this->file('parent/icons/menu.svg', self::svg('<path/>'));
+        $label = new class () implements \Stringable {
+            public function __toString(): string
+            {
+                return 'Menü';
+            }
+        };
+
+        $html = (string) Svg::inline('icons/menu', ['aria-label' => $label]);
+
+        self::assertStringContainsString('aria-label="Menü"', $html);
+        foreach ([['class' => ['icon']], [0 => 'icon']] as $attributes) {
+            try {
+                Svg::inline('icons/menu', $attributes);
+                self::fail('Accepted ' . json_encode($attributes));
+            } catch (\InvalidArgumentException) {
+                $this->addToAssertionCount(1);
+            }
+        }
+    }
+
     public function testTemplateAttributesAreValidatedAndEscaped(): void
     {
         $this->file('parent/icons/menu.svg', '<svg xmlns="http://www.w3.org/2000/svg" width="10"><path/></svg>');
