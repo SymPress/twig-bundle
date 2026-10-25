@@ -124,7 +124,7 @@ final class SvgTest extends WordPressTestCase
         $this->file('parent/icons/legacy.svg', self::svg('<defs><path id="p" d="M0 0"/></defs><use xlink:href="#p"/>'));
         $warnings = [];
         set_error_handler(static function (int $level, string $message) use (&$warnings): bool {
-            $warnings[] = $message;
+            $warnings[] = $level . ': ' . $message;
             return true;
         });
         try {
