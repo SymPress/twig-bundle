@@ -6,11 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
-## Unreleased
+## 1.3.0 - 2026-10-25
 
 - Add `svg()` to inline theme SVG files with child-to-parent fallback. Files
   pass an element and attribute allowlist before crossing the Html boundary;
-  unnamed icons are hidden from assistive technology. Requires `ext-dom`.
+  references stay local, entity declarations are refused and unnamed icons are
+  hidden from assistive technology. Requires `ext-dom`.
+- Scope test autoloading to `tests/Unit` and `tests/Fixtures` so the optimized
+  classmap no longer follows the WordPress fixture's path-repository symlink.
 
 ## 1.2.3 - 2026-10-16
 
