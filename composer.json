@@ -37,7 +37,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SymPress\\TwigBundle\\Tests\\": "tests/"
+            "SymPress\\TwigBundle\\Tests\\Fixtures\\": "tests/Fixtures/",
+            "SymPress\\TwigBundle\\Tests\\Unit\\": "tests/Unit/"
         }
     },
     "extra": {
