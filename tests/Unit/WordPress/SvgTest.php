@@ -90,6 +90,35 @@ final class SvgTest extends WordPressTestCase
         self::assertStringContainsString('<stop offset="0" stop-color="#000"/>', $html);
     }
 
+    public function testParserDifferentialsCannotBreakOutOfTheSvg(): void
+    {
+        $this->file('parent/icons/mxss.svg', <<<'SVG'
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:s="http://www.w3.org/2000/svg">
+              <title>&lt;/title&gt;&lt;img src=x onerror=alert(1)&gt;</title>
+              <desc><![CDATA[</desc></svg><img src=x onerror=alert(2)>]]></desc>
+              <s:script>alert(3)</s:script>
+              <SCRIPT>alert(4)</SCRIPT>
+              <g xmlns="http://www.w3.org/1999/xhtml"><img src="x" onerror="alert(5)"/></g>
+              <rect fill="&#x75;rl(https://evil.example/a)" style="background:URL( 'https://evil.example/b' )"/>
+              <set attributeName="onmouseover" to="alert(6)"/>
+              <text><tspan>Ok &amp; fine</tspan></text>
+            </svg>
+            SVG);
+
+        $html = (string) Svg::inline('icons/mxss');
+
+        self::assertStringNotContainsString('<img', $html);
+        self::assertStringNotContainsString('</svg><', $html);
+        self::assertSame(1, substr_count($html, '</svg>'));
+        $removed = ['alert(3)', 'alert(4)', 'alert(5)', 'alert(6)', 'evil.example', 'script', 'SCRIPT', '<set'];
+        foreach ($removed as $needle) {
+            self::assertStringNotContainsString($needle, $html, $needle);
+        }
+        self::assertStringContainsString('&lt;/title&gt;&lt;img', $html);
+        self::assertStringContainsString('&lt;/desc&gt;&lt;/svg&gt;', $html);
+        self::assertStringContainsString('<tspan>Ok &amp; fine</tspan>', $html);
+    }
+
     public function testEntityDeclarationsAreRefused(): void
     {
         $doctype = '<?xml version="1.0"?><!DOCTYPE svg [<!ENTITY x SYSTEM "file:///etc/passwd">]>';
