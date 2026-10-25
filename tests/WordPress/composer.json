@@ -15,7 +15,9 @@
       "type": "path",
       "url": "../..",
       "options": {
-        "symlink": true
+        "symlink": true,
+        "versions": { "sympress/twig-bundle": "dev-main" },
+        "reference": "config"
       }
     }
   ],
