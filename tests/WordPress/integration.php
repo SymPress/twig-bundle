@@ -111,4 +111,20 @@ $url = 'https://x.de/?a=1&b=2';
 $assert($renderer->renderBlock('security', 'url', ['value' => $url]) === '<a href="' . esc_url($url) . '">link</a>', 'WordPress URL filters preserve query parameters without double escaping.');
 $assert($renderer->renderBlock('security', 'nulls', ['value' => null]) === '', 'Nullable metadata passes all WordPress filters without TypeError.');
 echo "PASS: URL escaping and null metadata under real WordPress.\n";
+$svg = static fn (string $name): string => $renderer->renderBlock('security', 'svg', ['name' => $name]);
+$assert(str_contains($svg('icons/menu'), 'Child menu') && !str_contains($svg('icons/menu'), 'aria-hidden'), 'svg() prefers the child theme file.');
+$check = $svg('icons/check');
+$assert(str_contains($check, 'M1 1h22') && str_contains($check, 'class="icon"') && str_contains($check, 'aria-hidden="true"'), 'svg() falls back to the parent theme through symlinked theme roots.');
+$assert(!str_contains($check, 'onload') && !str_contains($check, 'script') && !str_contains($check, 'alert'), 'svg() sanitizes theme files under real WordPress.');
+$warned = 0;
+$onError = static function () use (&$warned): void { ++$warned; };
+add_action('wp_trigger_error_always_run', $onError);
+add_filter('wp_trigger_error_trigger_error', '__return_false');
+try {
+    $assert(trim($svg('icons/missing')) === '' && $warned === 1, 'svg() renders nothing for missing files and reports them.');
+} finally {
+    remove_action('wp_trigger_error_always_run', $onError);
+    remove_filter('wp_trigger_error_trigger_error', '__return_false');
+}
+echo "PASS: svg() child fallback and sanitization under real WordPress.\n";
 require __DIR__ . '/features.php';

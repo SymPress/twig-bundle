@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": "^8.5",
+        "ext-dom": "*",
         "symfony/config": "^8.0",
         "symfony/dependency-injection": "^8.0",
         "symfony/http-foundation": "^8.1.9",
@@ -36,7 +37,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "SymPress\\TwigBundle\\Tests\\": "tests/"
+            "SymPress\\TwigBundle\\Tests\\Fixtures\\": "tests/Fixtures/",
+            "SymPress\\TwigBundle\\Tests\\Unit\\": "tests/Unit/"
         }
     },
     "extra": {

@@ -167,6 +167,20 @@ Lazy runtimes expose `wp_head`, `wp_footer`, `wp_body_open`,
 `__`, `_x`, `_n`, `_nx`, `is_front_page`, `is_home`, `is_singular`, `is_archive`,
 `has_nav_menu`. Comments enqueue `comment-reply` when needed.
 
+`svg('icons/menu', {class: 'icon'})` inlines `icons/menu.svg` from the child
+theme, falling back to the parent theme. Names are relative theme paths; `..`,
+absolute paths and symlinks leading out of the theme are refused. Every file
+passes an element and attribute allowlist: scripts, `<style>`, `foreignObject`,
+images, links, animations, event handlers, editor namespaces, comments and
+entity declarations are removed or refused; `href` and `url()` may only point
+to fragments in the same file, and `image-set()`/`src()` are refused. Attributes
+passed from the template are checked against the same allowlist (`aria-*`
+included); `null` removes one and booleans render as `"true"`/`"false"`. An icon
+without `aria-label`, `aria-labelledby`, `role` or a root `<title>` receives
+`aria-hidden="true"`. Missing or invalid files render nothing and raise a
+`wp_trigger_error()` warning in debug mode. Inline icons share the page's ID
+space, so keep gradient and clip-path IDs unique across icons.
+
 Filters include `esc_html`, `esc_attr`, `esc_url`, `esc_js`, `wp_kses_post`,
 `wp_kses`, `wpautop`, `shortcodes`, `stripshortcodes`, `excerpt`, `time_ago`,
 `size_format`, `wp_date` and WordPress-aware `date`. Use WordPress escaping as
