@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SymPress\TwigBundle\Tests\Unit;
 
+use Brain\Monkey;
 use PHPUnit\Framework\TestCase;
 use SymPress\TwigBundle\Attribute\AsTwigGlobal;
 use SymPress\TwigBundle\DependencyInjection\TwigExtension;
@@ -23,6 +24,19 @@ use SymPress\TwigBundle\WordPress\TermFactory;
 
 final class TwigBundleTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Monkey\setUp();
+        Monkey\Functions\when('get_current_blog_id')->justReturn(1);
+    }
+
+    protected function tearDown(): void
+    {
+        Monkey\tearDown();
+        parent::tearDown();
+    }
+
     public function testRegistersSymPressTwigAutoconfiguration(): void
     {
         $container = $this->container();
