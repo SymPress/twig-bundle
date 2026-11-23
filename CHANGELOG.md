@@ -29,6 +29,18 @@ where applicable.
   to exclude CVE-2026-109413.
 - Cover Cache-Control parsing with long whitespace runs and whitespace separators.
 
+## 1.2.2 - 2026-10-03
+
+- Run the complete dependency canary and QA checks of the pinned SymPress
+  workflows. No runtime changes.
+
+## 1.2.1 - 2026-10-02
+
+- Require the stable SymPress release train (Framework Bundle 1.0.2, Kernel
+  1.1.1) and keep tests, CI and local configuration out of Composer archives.
+- Pin reusable workflows to a reviewed commit, add a weekly dependency canary
+  and run the native WordPress fixture in a dedicated DDEV job.
+
 ## 1.2.0 - 2026-10-01
 
 - Make WordPress helpers and the shared document layout available to registered
