@@ -110,6 +110,9 @@ WordPress password form; protected metadata/images are withheld. Excerpts never
 expose password-protected stored text, including to unlocked visitors. Author
 and taxonomy lookups are lazy and memoized; protected posts return null/empty
 results. Unknown taxonomies return an empty list. Term access uses configured models.
+The native `post.wpPost` is the raw `WP_Post` and bypasses these protections:
+`post.wpPost.post_content` prints password-protected text to every visitor. Use the
+model accessors in templates and reach for `wpPost` only in PHP that checks access.
 
 `author` in archive context and `post.author` return a public `User` profile with
 `id`, `name`, `slug`, `url`, `description` and `avatar(size)`. Safe compatibility
