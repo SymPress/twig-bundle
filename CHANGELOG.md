@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 where applicable.
 
+## 1.3.2 - 2026-11-23
+
+- Cache Post models per site. On multisite, a post loaded after
+  `switch_to_blog()` no longer reuses the model of the same ID from another site.
+- Require Symfony DependencyInjection 8.1.11 like the other Symfony components.
+- Document that the native `post.wpPost` bypasses password protection.
+- CI: pin `sympress/workflows` to 1.3.2 and let Dependabot update action pins.
+
 ## 1.3.1 - 2026-11-06
 
 - Use the Symfony 8.1.11 security patches released on November 4.
