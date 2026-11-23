@@ -924,16 +924,16 @@
         },
         {
             "name": "symfony/dependency-injection",
-            "version": "v8.1.9",
+            "version": "v8.1.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/dependency-injection.git",
-                "reference": "3356c3c6528356616db60f110481092d856691b5"
+                "reference": "d678f8d0527ed592593901da3ba2e2c17f7d51c1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/3356c3c6528356616db60f110481092d856691b5",
-                "reference": "3356c3c6528356616db60f110481092d856691b5",
+                "url": "https://api.github.com/repos/symfony/dependency-injection/zipball/d678f8d0527ed592593901da3ba2e2c17f7d51c1",
+                "reference": "d678f8d0527ed592593901da3ba2e2c17f7d51c1",
                 "shasum": ""
             },
             "require": {
@@ -981,7 +981,7 @@
             "description": "Allows you to standardize and centralize the way objects are constructed in your application",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/dependency-injection/tree/v8.1.9"
+                "source": "https://github.com/symfony/dependency-injection/tree/v8.1.11"
             },
             "funding": [
                 {
@@ -1001,7 +1001,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-10-13T12:55:44+00:00"
+            "time": "2026-11-01T19:30:44+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -3306,13 +3306,13 @@
             "dist": {
                 "type": "path",
                 "url": "../..",
-                "reference": "2669b3ffbdaad594abb76381a1179e0533e6a2f4"
+                "reference": "51e2b26db8fc4561f460506266459e653c4b11e4"
             },
             "require": {
                 "ext-dom": "*",
                 "php": "^8.5",
                 "symfony/config": "^8.1.11",
-                "symfony/dependency-injection": "^8.0",
+                "symfony/dependency-injection": "^8.1.11",
                 "symfony/http-foundation": "^8.1.11",
                 "symfony/http-kernel": "^8.1.11",
                 "symfony/twig-bridge": "^8.1",
