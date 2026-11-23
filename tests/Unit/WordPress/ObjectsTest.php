@@ -10,6 +10,7 @@ use SymPress\TwigBundle\WordPress\Menu;
 use SymPress\TwigBundle\WordPress\MetaResolver;
 use SymPress\TwigBundle\WordPress\Pagination;
 use SymPress\TwigBundle\WordPress\Post;
+use SymPress\TwigBundle\WordPress\PostFactory;
 use SymPress\TwigBundle\WordPress\Runtime\TemplateRuntime;
 use SymPress\TwigBundle\WordPress\Runtime\TranslationRuntime;
 use SymPress\TwigBundle\WordPress\ThemeConfiguration;
@@ -43,6 +44,23 @@ final class ObjectsTest extends WordPressTestCase
         self::assertSame('2026-10-01T00:00:00+02:00', $date->format(DATE_ATOM));
         Functions\when('get_field_object')->justReturn(['type' => 'text', 'value' => '<b>Text</b>']);
         self::assertSame('<b>Text</b>', $meta->resolve($native, 'text'));
+    }
+
+    public function testPostModelsAreCachedPerSite(): void
+    {
+        $factory = new PostFactory(new MetaResolver());
+        $first = new \WP_Post();
+        $first->post_name = 'site-one';
+        $second = new \WP_Post();
+        $second->post_name = 'site-two';
+
+        Functions\when('get_current_blog_id')->justReturn(1);
+        $model = $factory->from($first);
+        self::assertSame($model, $factory->from($first));
+        Functions\when('get_current_blog_id')->justReturn(2);
+        self::assertSame($second, $factory->from($second)->wpPost);
+        Functions\when('get_current_blog_id')->justReturn(1);
+        self::assertSame($model, $factory->from($first));
     }
 
     public function testMenusKeepMarkupInTwigAndRespectDepthAndCurrentState(): void

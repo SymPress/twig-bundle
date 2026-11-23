@@ -6,7 +6,7 @@ namespace SymPress\TwigBundle\WordPress;
 
 final class PostFactory
 {
-    /** @var array<int, Post> */
+    /** @var array<string, Post> Keyed by site and post ID: IDs repeat across a multisite network. */
     private array $posts = [];
 
     /**
@@ -18,6 +18,11 @@ final class PostFactory
 
     public function from(\WP_Post $post): Post
     {
-        return $this->posts[$post->ID] ??= $this->instantiator->post($this->models[$post->post_type] ?? Post::class, $post, $this->meta, $this->terms);
+        return $this->posts[get_current_blog_id() . ':' . $post->ID] ??= $this->instantiator->post(
+            $this->models[$post->post_type] ?? Post::class,
+            $post,
+            $this->meta,
+            $this->terms,
+        );
     }
 }
